@@ -496,9 +496,10 @@
         <label>Username</label>
         <input type="text" id="login-user" placeholder="Masukkan username" autocomplete="username">
       </div>
-      <div class="input-wrap">
+      <div class="input-wrap" style="position:relative">
         <label>Password</label>
-        <input type="password" id="login-pass" placeholder="Masukkan password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+        <input type="password" id="login-pass" placeholder="Masukkan password" autocomplete="current-password" style="padding-right:40px;" onkeydown="if(event.key==='Enter')doLogin()">
+        <span class="ms" id="login-eye" onclick="toggleEye('login-pass','login-eye')" style="position:absolute; right:12px; top:36px; cursor:pointer; color:var(--muted)">visibility_off</span>
       </div>
 
       <button class="btn btn-primary" style="width:100%;margin-bottom:12px" onclick="doLogin()">Masuk</button>
@@ -517,7 +518,10 @@
       <div class="input-wrap"><input type="email" id="reg-email" placeholder="Alamat Email (opsional)"></div>
       <div class="input-wrap"><input type="tel" id="reg-wa" placeholder="No. WhatsApp (opsional)"></div>
       <div class="input-wrap"><input type="text" id="reg-sekolah" placeholder="Nama Sekolah (cth: SDN 1 Jakarta)"></div>
-      <div class="input-wrap"><input type="password" id="reg-pass" placeholder="Buat Password"></div>
+      <div class="input-wrap" style="position:relative">
+        <input type="password" id="reg-pass" placeholder="Buat Password" style="padding-right:40px;">
+        <span class="ms" id="reg-eye" onclick="toggleEye('reg-pass','reg-eye')" style="position:absolute; right:12px; top:12px; cursor:pointer; color:var(--muted)">visibility_off</span>
+      </div>
       
       <button class="btn btn-primary" style="width:100%;margin-bottom:12px" onclick="doRegister()">Daftar Sekarang</button>
       <p style="font-size:14px;color:var(--muted)">Sudah punya akun? <a href="#" style="color:var(--primary);text-decoration:none;font-weight:600" onclick="showView('login-view')">Masuk di sini</a></p>
@@ -1447,20 +1451,40 @@
     // AUTH
     // ================================================
     function doLogin(){
-      var u = (document.getElementById('login-user').value||'').trim();
-      var p = (document.getElementById('login-pass').value||'').trim();
-      var errEl = document.getElementById('login-err');
-      errEl.style.display='none';
-
-      if(!u||!p){ errEl.textContent='Username dan password wajib diisi.'; errEl.style.display='block'; return; }
-
-      var akun = null;
-      var allGuru = dbGet('guru');
-      for(var i=0;i<allGuru.length;i++){
-        if(allGuru[i].username===u && allGuru[i].password===p){ akun=allGuru[i]; break; }
+      var btn = event.currentTarget || event.target;
+      var oriText = '';
+      if(btn && btn.tagName === 'BUTTON') {
+         oriText = btn.innerHTML;
+         btn.innerHTML = '<span class="ms" style="animation:spin 1s linear infinite">refresh</span> Memeriksa...';
+         btn.disabled = true;
       }
-
-      if(!akun){ errEl.textContent='Username atau password salah!'; errEl.style.display='block'; return; }
+      
+      setTimeout(function() {
+        var u = (document.getElementById('login-user').value||'').trim();
+        var p = (document.getElementById('login-pass').value||'').trim();
+        var errEl = document.getElementById('login-err');
+        errEl.style.display='none';
+  
+        if(!u||!p){ 
+           errEl.textContent='Username dan password wajib diisi.'; 
+           errEl.style.display='block'; 
+           if(btn && btn.tagName === 'BUTTON') { btn.innerHTML = oriText; btn.disabled = false; }
+           return; 
+        }
+  
+        var akun = null;
+        var allGuru = dbGet('guru');
+        for(var i=0;i<allGuru.length;i++){
+          // Konversi ke string karena Spreadsheet kadang mengubah angka (misal pass 1234) menjadi Number
+          if(String(allGuru[i].username) === u && String(allGuru[i].password) === p){ akun=allGuru[i]; break; }
+        }
+  
+        if(!akun){ 
+           errEl.textContent='Username atau password salah!'; 
+           errEl.style.display='block'; 
+           if(btn && btn.tagName === 'BUTTON') { btn.innerHTML = oriText; btn.disabled = false; }
+           return; 
+        }
 
       currentAkun = akun; // Set state global
       
@@ -1491,6 +1515,9 @@
       showView('admin-view');
       renderDash();
       toast('Selamat datang, '+akun.nama+'!','success');
+      
+      if(btn && btn.tagName === 'BUTTON') { btn.innerHTML = oriText; btn.disabled = false; }
+      }, 600); // Simulasi delay seolah-olah mengecek ke server
     }
 
     function doRegister() {
@@ -2165,11 +2192,15 @@
         btn.innerHTML = '<span class="ms" style="animation:spin 1s linear infinite">refresh</span> Mengunggah...';
         btn.disabled = true;
         try {
+          // Format nama pakaian agar aman dijadikan nama file
+          var safePakaianName = nama.replace(/[^a-zA-Z0-9 _-]/g, '').trim() || 'Pakaian';
+          
           var res = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
             body: JSON.stringify({
               action: 'upload_image',
-              filename: 'pakaian_' + Date.now() + '.jpg',
+              filename: safePakaianName + '.jpg',
+              guruName: currentAkun ? currentAkun.nama : 'Admin',
               base64: b64
             }),
             headers: { 'Content-Type': 'text/plain;charset=utf-8' }
