@@ -1062,6 +1062,13 @@
 
     var PFX = 'pdg_';
     
+    // Validasi URL foto agar tidak menampilkan gambar pecah
+    function isValidFoto(url) {
+      if(!url || typeof url !== 'string') return false;
+      var v = url.trim();
+      return v.startsWith('http://') || v.startsWith('https://') || v.startsWith('data:image');
+    }
+    
     // Fungsi untuk mendapatkan key storage yang spesifik untuk sekolah
     function getTableKey(t) {
       if(t === 'guru') return PFX + t; // Tabel guru bersifat global
@@ -1606,7 +1613,7 @@
       var name  = document.getElementById('uniform-name');
       var desc  = document.getElementById('uniform-desc');
 
-      if(info.pakaian.foto) {
+      if(isValidFoto(info.pakaian.foto)) {
         card.style.backgroundImage = 'url(' + info.pakaian.foto + ')';
         card.style.backgroundColor = '#000'; // fallback
       } else {
@@ -1622,7 +1629,7 @@
       desc.innerHTML = kegHtml + '<div style="margin-top:4px; opacity:0.8">' + (info.pakaian.desc||'') + '</div>';
 
       // Auto-contrast teks jika tidak ada gambar
-      if(!info.pakaian.foto) {
+      if(!isValidFoto(info.pakaian.foto)) {
         var hex = (info.pakaian.warna||'#000').replace('#','');
         var r=parseInt(hex.substr(0,2),16), g=parseInt(hex.substr(2,2),16), b=parseInt(hex.substr(4,2),16);
         var lum = (0.299*r + 0.587*g + 0.114*b)/255;
@@ -1770,7 +1777,7 @@
       document.getElementById('admin-today-date').textContent = HARI[now.getDay()]+', '+now.getDate()+' '+BULAN[now.getMonth()]+' '+now.getFullYear() + ' (Minggu ke-'+info.wk+')';
       
       var thumb = document.getElementById('admin-today-thumb');
-      if(info.pakaian.foto) {
+      if(isValidFoto(info.pakaian.foto)) {
         thumb.style.backgroundImage = 'url(' + info.pakaian.foto + ')';
         thumb.style.backgroundColor = '#000';
       } else {
@@ -1815,7 +1822,7 @@
     function renderPakaian(){
       var data = dbGet('pakaian');
       document.getElementById('tb-pakaian').innerHTML = data.map(function(d){
-        var thumb = d.foto 
+        var thumb = isValidFoto(d.foto)
             ? '<div style="width:36px;height:36px;border-radius:6px;background:url('+d.foto+') center/cover"></div>' 
             : '<div style="width:36px;height:36px;border-radius:6px;background:'+d.warna+'"></div>';
         return '<tr>'+
