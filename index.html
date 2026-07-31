@@ -1,0 +1,2969 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Pakaian Dinas Guru</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    /* =====================================================
+       ROOT VARIABLES & THEME
+    ===================================================== */
+    :root, [data-theme="light"] {
+      --primary:       #2563eb;
+      --primary-dark:  #1d4ed8;
+      --primary-light: #60a5fa;
+      --bg:      #f1f5f9;
+      --surface: #ffffff;
+      --glass:   rgba(255,255,255,0.75);
+      --text:    #0f172a;
+      --muted:   #64748b;
+      --border:  #e2e8f0;
+      --danger:  #ef4444;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --shadow:  0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1);
+      --r-md:  12px;
+      --r-lg:  24px;
+      --r-full:9999px;
+      --tr: all .3s cubic-bezier(.4,0,.2,1);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg:      #0f172a;
+        --surface: #1e293b;
+        --glass:   rgba(30,41,59,.75);
+        --text:    #f8fafc;
+        --muted:   #94a3b8;
+        --border:  #334155;
+      }
+    }
+    [data-theme="dark"] {
+      --bg:      #0f172a;
+      --surface: #1e293b;
+      --glass:   rgba(30,41,59,.75);
+      --text:    #f8fafc;
+      --muted:   #94a3b8;
+      --border:  #334155;
+    }
+
+    /* =====================================================
+       RESET & BASE
+    ===================================================== */
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Inter',sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      -webkit-font-smoothing:antialiased;
+    }
+    img{display:block}
+
+    /* =====================================================
+       UTILITIES
+    ===================================================== */
+    .glass{
+      background:var(--glass);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+      border:1px solid rgba(255,255,255,.18);
+    }
+    .hidden{display:none!important}
+    .ms{font-family:'Material Symbols Rounded';font-size:24px;font-style:normal;font-weight:normal;line-height:1;letter-spacing:normal;text-transform:none;white-space:nowrap;word-wrap:normal;direction:ltr;-webkit-font-feature-settings:'liga';font-feature-settings:'liga';-webkit-font-smoothing:antialiased;user-select:none;}
+
+    /* =====================================================
+       COMPONENTS
+    ===================================================== */
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:12px 24px;border-radius:var(--r-full);font-weight:600;
+      cursor:pointer;border:none;transition:var(--tr);font-size:14px;
+      font-family:'Inter',sans-serif;
+    }
+    .btn-primary{background:var(--primary);color:#fff;box-shadow:0 4px 14px 0 rgba(37,99,235,.35)}
+    .btn-primary:hover{background:var(--primary-dark);transform:translateY(-2px)}
+    .btn-outline{background:transparent;border:2px solid var(--primary);color:var(--primary)}
+    .btn-outline:hover{background:rgba(37,99,235,.08)}
+    .btn-sm{padding:6px 14px;font-size:12px}
+    .btn-danger{color:var(--danger);background:transparent;border:2px solid var(--danger)}
+
+    .input-wrap{margin-bottom:16px}
+    .input-wrap label{display:block;margin-bottom:6px;font-size:13px;font-weight:500;color:var(--muted)}
+    .input-wrap input,.input-wrap select,.input-wrap textarea{
+      width:100%;padding:11px 14px;border-radius:var(--r-md);
+      border:1px solid var(--border);background:var(--surface);color:var(--text);
+      font-size:15px;font-family:'Inter',sans-serif;transition:var(--tr);
+    }
+    .input-wrap input:focus,.input-wrap select:focus,.input-wrap textarea:focus{
+      outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.18);
+    }
+
+    /* =====================================================
+       VIEWS (SPA routing)
+    ===================================================== */
+    .view{display:none}
+    .view.active{display:block;animation:fadeIn .35s ease}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+    /* =====================================================
+       LOGIN & REGISTRASI
+    ===================================================== */
+    #login-view.active, #register-view.active {
+      display:flex;
+    }
+    #login-view, #register-view {
+      min-height:100vh;align-items:center;
+      justify-content:center;padding:20px;
+      background:linear-gradient(135deg,#1e3a8a,#2563eb,#60a5fa);
+    }
+    .login-card{
+      width:100%;max-width:400px;padding:40px 32px;
+      border-radius:var(--r-lg);box-shadow:var(--shadow);text-align:center;
+    }
+    .login-logo{
+      width:80px;height:80px;
+      background:linear-gradient(135deg,var(--primary),var(--primary-light));
+      border-radius:50%;margin:0 auto 24px;
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 8px 20px rgba(37,99,235,.4);
+    }
+    .login-logo .ms{font-size:40px;color:#fff}
+    .login-card h1{font-size:22px;font-weight:700;margin-bottom:6px}
+    .login-card>p{color:var(--muted);font-size:14px;margin-bottom:28px}
+    .login-err{
+      background:rgba(239,68,68,.1);color:var(--danger);
+      border:1px solid rgba(239,68,68,.3);
+      border-radius:var(--r-md);padding:10px 14px;
+      font-size:13px;margin-bottom:16px;display:none;
+    }
+
+    /* =====================================================
+       GURU VIEW
+    ===================================================== */
+    #guru-view{max-width:600px;margin:0 auto;padding:24px 20px 80px}
+
+    .guru-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}
+    .guru-avatar{width:48px;height:48px;border-radius:50%;object-fit:cover;background:var(--border)}
+    .guru-profile{display:flex;align-items:center;gap:12px}
+    .guru-profile h2{font-size:15px;font-weight:600}
+    .guru-profile p{font-size:12px;color:var(--muted)}
+
+    .today-banner{text-align:center;margin-bottom:24px}
+    .today-banner .hari{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+    .today-banner .tanggal{font-size:28px;font-weight:800;color:var(--primary)}
+    .today-banner .minggu{font-size:12px;color:var(--muted);margin-top:4px}
+
+    .uniform-card{
+      position:relative;border-radius:var(--r-lg);overflow:hidden;
+      box-shadow:var(--shadow);margin-bottom:24px;
+      aspect-ratio:4/5;display:flex;flex-direction:column;justify-content:flex-end;
+      padding:32px;background-size:cover;background-position:center;
+    }
+    .uniform-card::before{
+      content:'';position:absolute;inset:0;
+      background:linear-gradient(to top,rgba(0,0,0,.9) 0%,rgba(0,0,0,.2) 60%,transparent 100%);
+      z-index:1;
+    }
+    .uniform-content{position:relative;z-index:2;color:#fff}
+    .uniform-badge{
+      display:inline-block;padding:5px 12px;border-radius:var(--r-full);
+      font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+      background:rgba(255,255,255,.2);backdrop-filter:blur(4px);
+      color:#fff;margin-bottom:10px;
+    }
+    .uniform-badge.khusus{background:rgba(239,68,68,.7)}
+    .uniform-name{font-size:34px;font-weight:800;line-height:1.1;margin-bottom:10px}
+    .uniform-desc{font-size:15px;opacity:.9;line-height:1.5}
+    .uniform-dl-btn{
+      position:absolute;top:20px;right:20px;z-index:2;
+      width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;
+      background:rgba(255,255,255,.2);backdrop-filter:blur(4px);
+      display:flex;align-items:center;justify-content:center;
+      transition:var(--tr);color:#fff;
+    }
+    .uniform-dl-btn:hover{background:rgba(255,255,255,.35)}
+
+    /* =====================================================
+       ADMIN DASHBOARD
+    ===================================================== */
+    #admin-view{display:flex;min-height:100vh}
+
+    /* Sidebar & Overlay */
+    .sidebar-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000;
+      display:none; backdrop-filter:blur(2px);
+    }
+    .sidebar-overlay.open { display:block; animation:fadeIn 0.2s; }
+    
+    .sidebar{
+      width:270px;background:var(--surface);border-right:1px solid var(--border);
+      display:flex;flex-direction:column;padding-bottom:16px;
+      position:fixed; top:0; bottom:0; left:-300px; z-index:1001; transition:var(--tr);
+    }
+    .sidebar.open { left:0; }
+    
+    @media(min-width:768px){
+      .sidebar{position:relative; left:0; transition:margin-left 0.3s ease; margin-left:0;}
+      .sidebar.closed-pc{margin-left:-270px;}
+      .bottom-nav{display:none!important}
+      .main-content{padding-bottom:24px!important}
+      #main-burger-btn { display:none !important; }
+      .sidebar.closed-pc ~ .main-content #main-burger-btn { display:flex !important; }
+    }
+    .sidebar-brand{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);margin-bottom:8px}
+    .brand-icon{width:40px;height:40px;background:var(--primary);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff; flex-shrink:0}
+    .brand-icon .ms{font-size:22px}
+    .brand-text h3{font-size:15px;font-weight:700;margin:0}
+    .brand-text p{font-size:12px;color:var(--muted);margin:0}
+    .nav-link{
+      display:flex;align-items:center;gap:14px;
+      padding:12px 18px;color:var(--text);font-size:14.5px;font-weight:600;
+      cursor:pointer;transition:var(--tr);border-left:4px solid transparent;
+      margin: 4px 12px; border-radius: 8px; border-right: none;
+    }
+    .nav-link:hover{background:var(--bg)}
+    .nav-link.active{background:rgba(37,99,235,.1);color:var(--primary);border-left-color:var(--primary)}
+    .nav-link.active .ms{color:var(--primary) !important;}
+    .nav-link.danger{color:var(--danger)}
+    .nav-spacer{flex:1}
+
+    /* Bottom Nav */
+    .bottom-nav{
+      position:fixed;bottom:0;left:0;right:0;
+      background:var(--surface);border-top:1px solid var(--border);
+      display:flex;justify-content:space-around;
+      padding:10px 8px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));
+      z-index:100;
+    }
+    .bn-item{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);font-size:11px;cursor:pointer;transition:var(--tr)}
+    .bn-item.active{color:var(--primary)}
+    .bn-item .ms{font-size:22px}
+
+    /* Main Content */
+    .main-content{flex:1;padding:24px;overflow-y:auto;padding-bottom:90px}
+
+    /* Admin sub-views */
+    .admin-tab{display:none}
+    .admin-tab.active{display:block;animation:fadeIn .3s ease}
+
+    /* Page header */
+    .ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;flex-wrap:wrap;gap:12px}
+    .ph h2{font-size:20px;font-weight:700}
+    .ph p{font-size:13px;color:var(--muted);margin-top:3px}
+
+    /* Stat cards */
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:28px}
+    .stat-card{
+      background:var(--surface);padding:22px;border-radius:var(--r-lg);
+      border:1px solid var(--border);display:flex;align-items:center;gap:16px;
+    }
+    .stat-icon{width:52px;height:52px;border-radius:50%;background:rgba(37,99,235,.1);color:var(--primary);display:flex;align-items:center;justify-content:center}
+    .stat-label{font-size:12px;font-weight:500;color:var(--muted)}
+    .stat-value{font-size:24px;font-weight:800;margin-top:3px}
+
+    /* Tables */
+    .table-wrap{background:var(--surface);border-radius:var(--r-lg);border:1px solid var(--border);overflow-x:auto}
+    table{width:100%;border-collapse:collapse;min-width:580px}
+    th,td{padding:14px 20px;text-align:left;border-bottom:1px solid var(--border)}
+    th{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;background:rgba(0,0,0,.02)}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:rgba(37,99,235,.02)}
+
+    .badge{padding:4px 10px;border-radius:var(--r-full);font-size:11px;font-weight:700}
+    .badge-ok{background:rgba(34,197,94,.12);color:var(--success)}
+    .badge-off{background:rgba(239,68,68,.12);color:var(--danger)}
+
+    /* Jadwal spreadsheet grid */
+    .sched-grid{display:grid;gap:0;border-top:1px solid #000;border-left:1px solid #000;border-radius:var(--r-md);overflow-x:auto}
+    .sg-head,.sg-cell,.sg-row{background:var(--surface);padding:14px 12px;text-align:center;border-bottom:1px solid #000;border-right:1px solid #000}
+    .sg-head{font-weight:600;font-size:13px;background:rgba(0,0,0,.03)}
+    .sg-row{font-weight:600;text-align:left}
+    .sg-cell select{width:100%;padding:4px 6px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:'Inter',sans-serif;font-size:11px}
+
+    /* Modals */
+    .modal-bg{
+      position:fixed;inset:0;background:rgba(0,0,0,.5);
+      backdrop-filter:blur(4px);z-index:500;
+      display:none;align-items:center;justify-content:center;padding:20px;
+    }
+    .modal-bg.open{display:flex;animation:fadeIn .2s ease}
+    .modal-box{
+      background:var(--surface);width:100%;max-width:480px;
+      border-radius:var(--r-lg);padding:30px;box-shadow:var(--shadow);
+      max-height:90vh;overflow-y:auto;
+    }
+    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
+    .modal-header h3{font-size:17px;font-weight:700}
+    .modal-close{background:none;border:none;color:var(--muted);cursor:pointer;display:flex}
+    
+    /* Kalender */
+    .cal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+    .cal-title { font-weight:700; font-size:18px; }
+    .cal-grid { display:grid; grid-template-columns:repeat(7, 1fr); gap:6px; min-width: 650px; }
+    .cal-day-head { text-align:center; font-weight:800; font-size:11px; text-transform:uppercase; color:#fff; padding:6px 2px; border-radius:var(--r-sm); margin-bottom:4px; display:flex; align-items:center; justify-content:center; min-height:32px; box-sizing:border-box; word-break:break-word; }
+    .cal-cell { 
+      background:var(--glass-bg); border:2px solid #000; border-radius:12px; 
+      min-height:90px; padding:0; display:flex; flex-direction:column; gap:0;
+      position:relative; overflow:hidden;
+    }
+    .cal-cell.today {
+      border: 2px solid #eab308 !important; /* Border emas */
+      box-shadow: 0 0 15px rgba(234, 179, 8, 0.4);
+      animation: shakeCell 0.4s ease-in-out infinite;
+      z-index: 1;
+    }
+    .cal-cell.today::before {
+      content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%);
+      transform: translateX(-150%) skewX(-25deg);
+      animation: sunlightSweep 2.5s infinite; z-index: 2; pointer-events: none;
+    }
+    /* Dihapus: .cal-cell.today > div yang merusak absolute positioning */
+    
+    @keyframes sunlightSweep { 
+      0% { transform: translateX(-150%) skewX(-25deg); } 
+      50%, 100% { transform: translateX(150%) skewX(-25deg); } 
+    }
+    @keyframes shakeCell { 
+      0%, 100% { transform: translateX(0); } 
+      25% { transform: translateX(-3px); } 
+      75% { transform: translateX(3px); } 
+    }
+    .cal-cell.empty { background:transparent; border:none; }
+    
+    .cal-date { 
+      position:absolute; top:6px; right:6px; z-index:3;
+      display:inline-flex; align-items:center; justify-content:center;
+      width:26px; height:26px; background:#fff; color:var(--primary);
+      border-radius:50%; font-size:14px; font-weight:800; box-shadow:0 2px 6px rgba(0,0,0,0.15);
+    }
+    .cal-date-today {
+      background:#22c55e !important; color:#fff !important; width:28px; height:28px;
+    }
+    
+    .cal-thumb { 
+      position:absolute; inset:0; width:100%; height:100%;
+      background-size:cover; background-position:center; 
+      display:flex; align-items:flex-end; padding:6px; z-index:1;
+    }
+    .cal-thumb-name {
+      font-size:10px; color:#fff; background:rgba(0,0,0,0.8); padding:4px 6px; border-radius:6px;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; text-align:center;
+      font-weight:700; letter-spacing:0.5px;
+
+    }
+
+    /* Toast */
+    #toasts{position:fixed;top:24px;right:24px;z-index:1000;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+    .toast{
+      background:var(--surface);color:var(--text);
+      padding:14px 20px;border-radius:var(--r-md);
+      box-shadow:var(--shadow);display:flex;align-items:center;gap:10px;
+      border-left:4px solid var(--primary);pointer-events:all;
+      animation:slideR .3s ease;
+    }
+    .toast.success{border-color:var(--success)}
+    .toast.error  {border-color:var(--danger)}
+    .toast.info   {border-color:var(--warning)}
+    @keyframes slideR{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+    @keyframes fadeOut{to{opacity:0;transform:translateY(-8px)}}
+
+    /* PDF Loading Modal & Render Zone */
+    #pdf-loading { position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; display:none; flex-direction:column; align-items:center; justify-content:center; color:#fff; backdrop-filter:blur(5px) }
+    #pdf-loading .spinner { width:60px; height:60px; border:6px solid rgba(255,255,255,0.2); border-top-color:#2563eb; border-radius:50%; animation:spin 1s linear infinite; margin-bottom:24px; }
+    #pdf-render-zone { position:absolute; left:-9999px; top:-9999px; width:794px; height:1123px; background:#fff; z-index:-1; font-family:'Inter', sans-serif; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px; box-sizing:border-box; color:#0f172a; overflow:hidden; }
+
+    @keyframes spinGlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 0.8; filter: blur(25px); }
+    }
+    
+    .glow-0 { --glow-color: #ef4444; }
+    .glow-1 { --glow-color: #eab308; }
+    .glow-2 { --glow-color: #f97316; }
+    .glow-3 { --glow-color: #a855f7; }
+    .glow-4 { --glow-color: #3b82f6; }
+    .glow-5 { --glow-color: #22c55e; }
+    .glow-6 { --glow-color: #ef4444; }
+
+    /* Mobile Adjustments */
+    @media(max-width:600px) {
+      #publik-view { padding: 12px 8px; }
+      #publik-view > div { padding: 20px 16px; }
+      #pub-today-card { padding: 20px; margin-bottom: 24px; }
+      #pub-today-glow-wrap { width: 220px; height: 220px; margin:0 auto 24px; }
+      #pub-sekolah-name { font-size: 20px; }
+      #pub-today-name { font-size: 20px; }
+      #pub-kalender-wrap { padding-top: 20px; margin-top: 20px; }
+      .cal-title { font-size: 16px; }
+      .cal-grid { gap: 4px; min-width: 580px; } /* Slightly tighter on mobile to reduce scroll */
+      .cal-day-head { font-size: 10px; min-height: 28px; }
+      .cal-cell { min-height: 80px; padding: 4px; }
+      .cal-thumb-name { font-size: 9px; padding: 2px; }
+    }
+  </style>
+  <script>
+    // Mencegah FOUC (Flash of Unstyled Content) saat ganti tema
+    (function(){
+      try {
+        var val = window.localStorage.getItem('pdg_theme');
+        var theme = val ? JSON.parse(val) : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch(e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- PDF Loading & Render Zone -->
+  <div id="pdf-loading">
+    <div class="spinner"></div>
+    <h2 style="font-size:24px; font-weight:800; margin-bottom:12px; letter-spacing:-0.5px">Menyusun PDF Kalender...</h2>
+    <p id="pdf-status" style="font-size:15px; color:rgba(255,255,255,0.8)">Harap tunggu, jangan tutup halaman ini.</p>
+  </div>
+  <div id="pdf-render-zone"></div>
+
+  <!-- Toast container -->
+  <div id="toasts"></div>
+
+  <!-- =====================================================
+       0. PUBLIK VIEW (Tampilan Khusus Tamu)
+  ===================================================== -->
+  <section id="publik-view" class="view" style="display:none; flex-direction:column; align-items:center; padding:32px 16px; min-height:100vh; background:var(--bg)">
+    <div style="width:100%; max-width:800px; margin:0 auto; background:var(--surface); padding:32px; border-radius:var(--r-lg); border:1px solid var(--border); box-shadow:0 20px 40px rgba(0,0,0,0.05); text-align:center;">
+      <h2 id="pub-sekolah-name" style="font-size:24px; font-weight:800; color:var(--text); margin-bottom:4px; letter-spacing:-0.5px">Nama Sekolah</h2>
+      <p style="font-size:15px; color:var(--muted); margin-bottom:32px; line-height:1.5">Jadwal Seragam Hari Ini<br><span id="pub-today-date" style="font-weight:700; color:var(--primary); font-size:16px;"></span></p>
+
+      <div id="pub-today-card" style="background:linear-gradient(135deg, var(--surface), var(--glass-bg)); border:1px solid var(--border); border-radius:var(--r-md); padding:32px; margin-bottom:32px; box-shadow: 0 10px 30px rgba(0,0,0,0.04);">
+         <div id="pub-today-glow-wrap" style="position:relative; width:320px; height:320px; margin:0 auto 32px; border-radius:24px; z-index:1; display:flex; align-items:center; justify-content:center;">
+           <div style="position:absolute; inset:-8px; border-radius:32px; background:conic-gradient(from 0deg, transparent 50%, var(--glow-color) 100%); animation: spinGlow 2.5s linear infinite; z-index:-1;"></div>
+           <div style="position:absolute; inset:-8px; border-radius:32px; background:var(--glow-color); filter:blur(20px); opacity:0.5; animation: pulseGlow 2.5s ease-in-out infinite; z-index:-2;"></div>
+           <div id="pub-today-thumb" style="width:100%; height:100%; border-radius:24px; background-size:cover; background-position:center; background-color:var(--surface); z-index:1; border:6px solid var(--surface)"></div>
+         </div>
+         <h3 id="pub-today-name" style="font-size:24px; font-weight:800; color:var(--primary); margin-bottom:8px; letter-spacing:-0.5px">Memuat...</h3>
+         <p id="pub-today-desc" style="font-size:15px; color:var(--text);"></p>
+      </div>
+
+      <button class="btn btn-primary" style="width:100%; justify-content:center; max-width:400px; margin:0 auto; font-size:16px; height:48px; border-radius:var(--r-md)" onclick="document.getElementById('pub-kalender-wrap').style.display='block'; renderKalender(); this.style.display='none'">
+        <span class="ms">calendar_month</span> Lihat Kalender Lengkap
+      </button>
+
+      <div id="pub-kalender-wrap" style="display:none; margin-top:32px; text-align:left; border-top:1px dashed var(--border); padding-top:32px;">
+        <div class="cal-header" style="margin-bottom:16px; justify-content:space-between; align-items:center;">
+          <button class="btn btn-outline btn-sm" onclick="navKalender(-1)"><span class="ms">chevron_left</span></button>
+          <div class="cal-title" style="font-size:18px; text-align:center; flex:1; font-weight:800; color:var(--text)">-</div>
+          <button class="btn btn-outline btn-sm" onclick="navKalender(1)"><span class="ms">chevron_right</span></button>
+        </div>
+        <div style="width:100%; overflow-x:auto; padding-bottom:16px;">
+          <div class="cal-grid"></div>
+        </div>
+      </div>
+
+      <!-- Tombol kembali ke area admin -->
+      <div style="margin-top:32px; border-top:1px solid var(--border); padding-top:24px;">
+         <button class="btn btn-outline" style="width:100%; max-width:400px; margin:0 auto; justify-content:center; gap:8px" onclick="window.location.href = window.location.pathname">
+           <span class="ms">admin_panel_settings</span> Buka Panel Admin / Login
+         </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================
+       1. LOGIN VIEW
+  ===================================================== -->
+  <section id="login-view" class="view">
+    <div class="login-card glass">
+      <div class="login-logo"><span class="ms">checkroom</span></div>
+      <h1>Pakaian Dinas Guru</h1>
+      <p>Masuk ke akun Anda untuk melanjutkan</p>
+
+      <div id="login-err" class="login-err"></div>
+
+      <div class="input-wrap">
+        <label>Username</label>
+        <input type="text" id="login-user" placeholder="Masukkan username" autocomplete="username">
+      </div>
+      <div class="input-wrap">
+        <label>Password</label>
+        <input type="password" id="login-pass" placeholder="Masukkan password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+
+      <button class="btn btn-primary" style="width:100%;margin-bottom:12px" onclick="doLogin()">Masuk</button>
+      <p style="font-size:14px;color:var(--muted);margin-top:16px">Belum punya akun? <a href="#" style="color:var(--primary);text-decoration:none;font-weight:600" onclick="showView('register-view')">Daftar di sini</a></p>
+    </div>
+  </section>
+
+  <section id="register-view" class="view">
+    <div class="login-card glass">
+      <h1>Registrasi Guru</h1>
+      <p>Buat akun untuk mengatur jadwal sekolah Anda</p>
+      <div id="register-err" class="login-err"></div>
+      
+      <div class="input-wrap"><input type="text" id="reg-nama" placeholder="Nama Lengkap"></div>
+      <div class="input-wrap"><input type="text" id="reg-user" placeholder="Username (digunakan untuk login)"></div>
+      <div class="input-wrap"><input type="email" id="reg-email" placeholder="Alamat Email (opsional)"></div>
+      <div class="input-wrap"><input type="tel" id="reg-wa" placeholder="No. WhatsApp (opsional)"></div>
+      <div class="input-wrap"><input type="text" id="reg-sekolah" placeholder="Nama Sekolah (cth: SDN 1 Jakarta)"></div>
+      <div class="input-wrap"><input type="password" id="reg-pass" placeholder="Buat Password"></div>
+      
+      <button class="btn btn-primary" style="width:100%;margin-bottom:12px" onclick="doRegister()">Daftar Sekarang</button>
+      <p style="font-size:14px;color:var(--muted)">Sudah punya akun? <a href="#" style="color:var(--primary);text-decoration:none;font-weight:600" onclick="showView('login-view')">Masuk di sini</a></p>
+    </div>
+  </section>
+
+  <!-- =====================================================
+       2. GURU VIEW
+  ===================================================== -->
+  <section id="guru-view" class="view">
+    <div id="guru-view-inner">
+      <div class="guru-header">
+        <div class="guru-profile">
+          <img src="https://i.pravatar.cc/150?img=11" alt="Foto" class="guru-avatar" id="guru-photo">
+          <div>
+            <h2 id="guru-name">Nama Guru</h2>
+            <p id="guru-nip">NIP: -</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline btn-sm" onclick="toggleTheme()" id="btn-theme-guru" title="Ganti Tema">
+            <span class="ms" style="font-size:18px">dark_mode</span>
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="doLogout()">
+            <span class="ms" style="font-size:18px">logout</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="today-banner">
+        <div class="hari">Pakaian Hari Ini</div>
+        <div class="tanggal" id="hari-ini-tgl">-</div>
+        <div class="minggu" id="hari-ini-minggu"></div>
+      </div>
+
+      <div class="uniform-card" id="uniform-card">
+        <button class="uniform-dl-btn" onclick="toast('Fitur unduh segera hadir','info')">
+          <span class="ms">download</span>
+        </button>
+        <div class="uniform-content">
+          <span class="uniform-badge" id="uniform-badge">Jadwal Mingguan</span>
+          <div class="uniform-name" id="uniform-name">–</div>
+          <div class="uniform-desc" id="uniform-desc"></div>
+        </div>
+      </div>
+
+      <div class="glass" style="padding:22px;border-radius:var(--r-lg);text-align:center">
+        <span class="ms" style="font-size:36px;color:var(--primary)">calendar_month</span>
+        <h3 style="margin:8px 0 4px">Jadwal Bulanan</h3>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Lihat rekap pakaian selama satu bulan</p>
+        <button class="btn btn-outline" style="width:100%" onclick="toast('Fitur kalender bulanan segera hadir!','info')">Lihat Kalender</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================
+       3. ADMIN VIEW
+  ===================================================== -->
+  <section id="admin-view" class="view" style="display:none">
+    <div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div class="brand-icon"><span class="ms">checkroom</span></div>
+          <div class="brand-text"><h3 id="sb-title">Admin Panel</h3><p id="sb-subtitle">Pakaian Dinas</p></div>
+        </div>
+        <button class="btn btn-outline" style="padding:4px; border:none; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="toggleSidebar()" title="Tutup Navigasi">
+          <span class="ms" style="font-size:24px">menu_open</span>
+        </button>
+      </div>
+      <div style="flex:1; overflow-y:auto; padding-bottom:8px">
+        <div class="nav-link active" onclick="openTab('dash',this)"><img src="icon_nav_home.jpg" style="width: 24px; height: 24px; border-radius: 6px; object-fit: cover;"> Dashboard</div>
+        <div class="nav-link" id="menu-guru-desktop" onclick="openTab('guru',this)"><img src="icon_nav_akun.jpg" style="width: 24px; height: 24px; border-radius: 6px; object-fit: cover;"> Master Akun Sekolah</div>
+        <div class="nav-link" onclick="openTab('pakaian',this)"><img src="icon_nav_pakaian.jpg" style="width: 24px; height: 24px; border-radius: 6px; object-fit: cover;"> Master Pakaian</div>
+        <div class="nav-link" onclick="openTab('jadwal',this)"><img src="icon_nav_jadwal.jpg" style="width: 24px; height: 24px; border-radius: 6px; object-fit: cover;"> Jadwal Mingguan</div>
+        <div class="nav-link" onclick="openTab('khusus',this)"><img src="icon_nav_khusus.jpg" style="width: 24px; height: 24px; border-radius: 6px; object-fit: cover;"> Hari Khusus</div>
+      </div>
+      <div class="nav-link danger" style="margin-top:auto" onclick="doLogout()"><span class="ms">logout</span> Logout</div>
+    </nav>
+
+    <!-- Bottom Nav (mobile) -->
+    <nav class="bottom-nav">
+      <div class="bn-item active" onclick="openTab('dash',this)"><img src="icon_nav_home.jpg" style="width: 22px; height: 22px; border-radius: 4px; object-fit: cover; margin-bottom: 2px;"><span>Home</span></div>
+      <div class="bn-item" id="menu-guru-mobile" onclick="openTab('guru',this)"><img src="icon_nav_akun.jpg" style="width: 22px; height: 22px; border-radius: 4px; object-fit: cover; margin-bottom: 2px;"><span>Akun</span></div>
+      <div class="bn-item" onclick="openTab('pakaian',this)"><img src="icon_nav_pakaian.jpg" style="width: 22px; height: 22px; border-radius: 4px; object-fit: cover; margin-bottom: 2px;"><span>Pakaian</span></div>
+      <div class="bn-item" onclick="openTab('jadwal',this)"><img src="icon_nav_jadwal.jpg" style="width: 22px; height: 22px; border-radius: 4px; object-fit: cover; margin-bottom: 2px;"><span>Jadwal</span></div>
+      <div class="bn-item" onclick="openTab('khusus',this)"><img src="icon_nav_khusus.jpg" style="width: 22px; height: 22px; border-radius: 4px; object-fit: cover; margin-bottom: 2px;"><span>Khusus</span></div>
+      <div class="bn-item" onclick="doLogout()"><span class="ms" style="color:var(--danger); font-size:24px">logout</span><span style="color:var(--danger)">Logout</span></div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      
+      <!-- Tombol Menu Utama (Hanya muncul jika sidebar tertutup di PC atau sedang di HP) -->
+      <div id="main-burger-btn" style="display:flex; margin-bottom:4px;">
+        <button class="btn btn-outline" style="padding:8px 12px; border:none; border-radius:var(--r-md); display:flex; align-items:center; gap:8px; margin-left:-8px;" onclick="toggleSidebar()" title="Buka Navigasi">
+          <span class="ms" style="font-size:26px">menu</span>
+        </button>
+      </div>
+
+      <!-- Tab: Dashboard -->
+      <div id="tab-dash" class="admin-tab active">
+        <div class="ph"><div><h2>Dashboard</h2><p>Ringkasan aplikasi hari ini</p></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn btn-outline btn-sm" onclick="toggleTheme()" id="btn-theme-admin" title="Ganti Tema"><span class="ms" style="font-size:18px">dark_mode</span></button>
+            <button class="btn btn-primary btn-sm" onclick="toast('Sinkronisasi…','info')"><span class="ms" style="font-size:18px">sync</span> Sinkron</button>
+            <button class="btn btn-outline btn-sm" onclick="openProfil()" style="display:flex; align-items:center; gap:6px; border-radius:var(--r-full); padding:6px 14px; font-weight:600;">
+              <span class="ms" style="font-size:16px">account_circle</span> Profil Saya
+            </button>
+          </div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon"><span class="ms">group</span></div>
+            <div><div class="stat-label">Total Guru</div><div class="stat-value" id="s-guru">0</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon"><span class="ms">styler</span></div>
+            <div><div class="stat-label">Total Pakaian</div><div class="stat-value" id="s-pakaian">0</div></div>
+          </div>
+          <div class="stat-card" style="grid-column:span 2">
+            <div class="stat-icon"><span class="ms">today</span></div>
+            <div>
+              <div class="stat-label">Pakaian Hari Ini</div>
+              <div class="stat-value" id="s-today" style="color:var(--primary);font-size:20px">–</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:3px" id="s-today-type"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Banner Pakaian Hari Ini (Admin Dashboard) -->
+        <div id="admin-today-card" style="background:linear-gradient(135deg, var(--surface), var(--glass-bg)); border:1px solid var(--border); border-radius:var(--r-md); padding:32px; margin-top:16px; margin-bottom:32px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); text-align:center;">
+           <h3 style="font-size:18px; font-weight:700; color:var(--text); margin-bottom:4px;">Seragam Hari Ini</h3>
+           <p id="admin-today-date" style="font-size:14px; font-weight:600; color:var(--primary); margin-bottom:20px;"></p>
+           <div id="admin-today-thumb" style="width:160px; height:160px; border-radius:24px; margin:0 auto 20px; background-size:cover; background-position:center; background-color:var(--border); box-shadow:0 12px 24px rgba(0,0,0,0.1);"></div>
+           <div id="admin-today-badge" style="display:inline-block; padding:4px 12px; border-radius:20px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; background:rgba(99,102,241,0.1); color:var(--primary);"></div>
+           <h3 id="admin-today-name" style="font-size:24px; font-weight:800; color:var(--primary); margin-bottom:8px; letter-spacing:-0.5px">Memuat...</h3>
+           <p id="admin-today-desc" style="font-size:15px; color:var(--text);"></p>
+        </div>
+      </div>
+
+      <!-- Tab: Master Guru -->
+      <div id="tab-guru" class="admin-tab">
+        <div class="ph">
+          <h2>Master Guru</h2>
+          <button class="btn btn-primary btn-sm" onclick="openModal('m-guru');clearGuruForm()"><span class="ms" style="font-size:18px">add</span> Tambah</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>NIP</th><th>Nama</th><th>Username</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody id="tb-guru"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab: Master Pakaian -->
+      <div id="tab-pakaian" class="admin-tab">
+        <div class="ph" style="align-items:center; flex-wrap:wrap">
+          <h2>Master Pakaian</h2>
+          <div style="display:flex; gap:8px; align-items:center">
+            <input type="text" placeholder="Cari pakaian..." oninput="cariTable('tb-pakaian', this.value)" style="padding:6px 12px; border-radius:6px; border:1px solid var(--border); background:var(--surface); color:var(--text); width:200px">
+            <button class="btn btn-primary btn-sm" onclick="openModal('m-pakaian');clearPakaianForm()"><span class="ms" style="font-size:18px">add</span> Tambah</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Foto</th><th>Nama Pakaian</th><th>Deskripsi</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody id="tb-pakaian"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab: Jadwal Mingguan -->
+      <div id="tab-jadwal" class="admin-tab">
+        <div class="ph">
+          <div><h2>Jadwal Mingguan</h2><p>Atur seragam tiap minggu & hari</p></div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap">
+            <button class="btn btn-outline btn-sm" onclick="openModal('m-master-kegiatan-list')" style="color:#8b5cf6; border-color:#8b5cf6; background:rgba(139,92,246,0.1)"><span class="ms" style="font-size:16px">list_alt</span> Master Kegiatan</button>
+            <button class="btn btn-outline btn-sm" onclick="copyPublicLink()" title="Salin Tautan Publik"><span class="ms" style="font-size:16px">content_copy</span> Salin Link</button>
+            <button class="btn btn-outline btn-sm" onclick="shareWA()" title="Kirim ke WhatsApp" style="color:#16a34a; border-color:#16a34a; background:rgba(22,163,74,0.1)"><span class="ms" style="font-size:16px">chat</span> Share WA</button>
+
+            <button class="btn btn-primary btn-sm" onclick="saveJadwal()"><span class="ms" style="font-size:18px">save</span> Simpan</button>
+          </div>
+        </div>
+        <div style="margin-bottom:16px; display:flex; gap:20px; font-size:14px; background:var(--glass-bg); padding:10px 16px; border-radius:var(--r-md); border:1px solid var(--border); flex-wrap:wrap; align-items:center">
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer">
+            <input type="checkbox" id="chk-sabtu" onchange="toggleHari()"> Tampilkan Hari Sabtu
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer">
+            <input type="checkbox" id="chk-minggu" onchange="toggleHari()"> Tampilkan Hari Minggu
+          </label>
+          
+          <div style="border-left:1px solid var(--border); padding-left:20px; display:flex; align-items:center; gap:8px;">
+            Siklus Jadwal:
+            <select id="sel-siklus" onchange="toggleHari()" style="padding:4px 8px; border-radius:4px; border:1px solid var(--border); background:var(--surface); color:var(--text)">
+              <option value="4">4 Minggu</option>
+              <option value="5" selected>5 Minggu</option>
+            </select>
+          </div>
+          
+          <div style="border-left:1px solid var(--border); padding-left:20px; display:flex; align-items:center; gap:12px; flex:1; flex-wrap:wrap;">
+             <label style="font-weight:700; color:var(--text)">Pilih Bulan:</label>
+             <select id="sel-jadwal-bulan" onchange="changeJadwalBulan()" style="padding:6px 12px; border-radius:6px; border:1px solid var(--border); background:var(--surface); color:var(--text); min-width:180px">
+                <option value="ALL">Default (Semua Bulan)</option>
+                <option value="1">Januari</option>
+                <option value="2">Februari</option>
+                <option value="3">Maret</option>
+                <option value="4">April</option>
+                <option value="5">Mei</option>
+                <option value="6">Juni</option>
+                <option value="7">Juli</option>
+                <option value="8">Agustus</option>
+                <option value="9">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+             </select>
+             <button id="btn-reset-jadwal" class="btn btn-outline btn-sm" style="display:none; color:var(--danger); border-color:var(--danger); padding:4px 8px; height:auto" onclick="resetJadwalBulan()" title="Hapus jadwal khusus ini"><span class="ms" style="font-size:16px">restart_alt</span> Reset</button>
+             <div id="lbl-jadwal-status" style="font-size:12px; color:var(--muted); font-style:italic"></div>
+          </div>
+          <div style="width:100%; font-size:12px; color:var(--muted); font-style:italic" id="lbl-siklus-info">*Minggu ke-5 otomatis kembali menggunakan jadwal Minggu ke-1 (dan seterusnya).</div>
+        </div>
+        <div class="sched-grid" id="sched-grid"></div>
+        
+
+      </div>
+
+
+
+      <!-- Tab: Hari Khusus -->
+      <div id="tab-khusus" class="admin-tab">
+        <div class="ph" style="align-items:center; flex-wrap:wrap">
+          <div><h2>Hari Khusus</h2><p style="font-size:13px; color:var(--muted); margin-top:3px">Prioritas tertinggi — mengalahkan jadwal mingguan</p></div>
+          <div style="display:flex; gap:8px; align-items:center">
+            <input type="text" placeholder="Cari hari khusus..." oninput="cariTable('tb-khusus', this.value)" style="padding:6px 12px; border-radius:6px; border:1px solid var(--border); background:var(--surface); color:var(--text); width:200px">
+            <button class="btn btn-primary btn-sm" onclick="openModal('m-khusus');clearKhususForm()"><span class="ms" style="font-size:18px">add</span> Tambah</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Tanggal</th><th>Bulan</th><th>Syarat Hari</th><th>Pakaian</th><th>Keterangan</th><th>Aksi</th></tr></thead>
+            <tbody id="tb-khusus"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Kalender Visual Shared Container -->
+      <div id="shared-kalender-container" style="display:none; margin-top:32px; padding-top:24px; border-top:1px dashed var(--border)">
+        <div class="ph" style="margin-bottom:16px; align-items:center; flex-wrap:wrap">
+          <div><h3 style="font-size:18px">Preview Kalender</h3><p style="font-size:13px; color:var(--muted); margin-top:3px">Simulasi pemakaian seragam dan kegiatan berdasarkan jadwal di atas.</p></div>
+          <div class="cal-header" style="margin-bottom:0; flex:1; min-width:300px; justify-content:flex-end; gap:8px; align-items:center">
+            <button class="btn btn-outline btn-sm" onclick="navKalender(-1)"><span class="ms">chevron_left</span> Bulan Lalu</button>
+            <div class="cal-title" id="cal-month-title" style="font-size:16px; min-width:130px; text-align:center; font-weight:800">-</div>
+            <button class="btn btn-outline btn-sm" onclick="navKalender(1)">Bulan Depan <span class="ms">chevron_right</span></button>
+            <button class="btn btn-primary btn-sm" style="margin-left:8px" onclick="goToToday()">Hari Ini <span id="cal-today-label" style="font-size:13px; font-weight:600; opacity:0.9; margin-left:6px; background:rgba(255,255,255,0.2); padding:2px 6px; border-radius:4px;"></span></button>
+            <button class="btn btn-primary btn-sm" style="margin-left:8px; background:var(--danger); border-color:var(--danger)" onclick="openModal('m-download-pdf')" title="Pilih Opsi Unduh PDF"><span class="ms" style="font-size:16px">picture_as_pdf</span> Unduh PDF <span class="ms" style="font-size:18px">arrow_drop_down</span></button>
+          </div>
+        </div>
+        <div style="width:100%; overflow-x:auto; padding-bottom:16px;">
+          <div class="cal-grid" id="cal-grid"></div>
+        </div>
+        <div id="cal-legend" style="margin-top:8px"></div>
+      </div>
+
+    </main>
+  </section>
+
+  <!-- =====================================================
+       MODALS
+  ===================================================== -->
+  
+  <!-- Modal Guru -->
+  <div class="modal-bg" id="m-guru">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="m-guru-title">Tambah Guru</h3>
+        <button class="modal-close" onclick="closeModal('m-guru')"><span class="ms">close</span></button>
+      </div>
+      <input type="hidden" id="fg-id">
+      <div class="input-wrap"><label>NIP</label><input type="text" id="fg-nip" placeholder="Nomor Induk Pegawai"></div>
+      <div class="input-wrap"><label>Nama Lengkap</label><input type="text" id="fg-nama" placeholder="Nama lengkap + gelar"></div>
+      <div class="input-wrap"><label>Username</label><input type="text" id="fg-user" placeholder="Untuk login"></div>
+      <div class="input-wrap"><label>Password</label><input type="password" id="fg-pass" placeholder="Password baru"></div>
+      <button class="btn btn-primary" style="width:100%" onclick="saveGuru(this)">Simpan</button>
+    </div>
+  </div>
+
+  <!-- Modal Pakaian -->
+  <div class="modal-bg" id="m-pakaian">
+    <div class="modal-box" style="max-width:1000px">
+      <div class="modal-header">
+        <h3 id="m-pakaian-title">Tambah Pakaian</h3>
+        <button class="modal-close" onclick="closeModal('m-pakaian')"><span class="ms">close</span></button>
+      </div>
+      <input type="hidden" id="fp-id">
+      
+      <!-- 4 Elements Grid -->
+      <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:16px; align-items:start; margin-bottom:16px;">
+        <div class="input-wrap" style="margin-bottom:0"><label>Nama Pakaian</label><input type="text" id="fp-nama" placeholder="contoh: PDH Khaki"></div>
+        <div class="input-wrap" style="margin-bottom:0"><label>Warna Tema</label><input type="color" id="fp-warna" value="#2563eb" style="height:48px;padding:4px;width:100%"></div>
+        <div style="display:flex; flex-direction:column; gap:8px">
+          <div class="input-wrap" style="margin-bottom:0"><label>Foto Seragam (Opsional)</label><input type="file" id="fp-foto" accept="image/*" style="padding-top:10px" onchange="previewFoto(this)"></div>
+          <div id="fp-preview" style="width:100%;height:100px;background-size:contain;background-repeat:no-repeat;background-position:center;border-radius:var(--r-md);display:none;background-color:rgba(0,0,0,0.2)"></div>
+          <input type="hidden" id="fp-foto-b64">
+        </div>
+        <div class="input-wrap" style="height:100%; margin-bottom:0; display:flex; flex-direction:column"><label>Deskripsi</label><textarea id="fp-desc" style="flex:1; min-height:80px; resize:none" placeholder="Keterangan singkat pakaian"></textarea></div>
+      </div>
+      
+
+      <button class="btn btn-primary" style="width:100%" onclick="savePakaian(this)">Simpan</button>
+    </div>
+  </div>
+
+  <!-- Modal Pilihan Unduh PDF -->
+  <div class="modal-bg" id="m-download-pdf">
+    <div class="modal-box" style="max-width:400px">
+      <div class="modal-header">
+        <h3>Opsi Unduh Kalender</h3>
+        <button class="modal-close" onclick="closeModal('m-download-pdf')"><span class="ms">close</span></button>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:12px; margin-top:8px">
+        <button class="btn btn-outline" style="justify-content:flex-start; height:auto; padding:12px; text-align:left; border-color:var(--border)" onclick="closeModal('m-download-pdf'); downloadKalenderSatuLembar()">
+          <span class="ms" style="font-size:28px; color:var(--danger)">grid_on</span>
+          <div style="margin-left:12px">
+            <div style="font-weight:700; color:var(--text)">Format Tabel (1 Lembar)</div>
+            <div style="font-size:12px; font-weight:400; color:var(--muted); margin-top:4px; white-space:normal">Seluruh jadwal bulan ini dirangkum dalam satu tabel kalender. Cocok untuk dicetak dan ditempel di dinding ruang guru.</div>
+          </div>
+        </button>
+        <button class="btn btn-outline" style="justify-content:flex-start; height:auto; padding:12px; text-align:left; border-color:var(--border)" onclick="closeModal('m-download-pdf'); downloadKalenderPDF()">
+          <span class="ms" style="font-size:28px; color:var(--danger)">picture_as_pdf</span>
+          <div style="margin-left:12px">
+            <div style="font-weight:700; color:var(--text)">Format Harian (1 Halaman / Hari)</div>
+            <div style="font-size:12px; font-weight:400; color:var(--muted); margin-top:4px; white-space:normal">Setiap tanggal akan dibuat menjadi satu halaman/poster besar. Cocok untuk ditampilkan di layar mading digital atau dibagikan ke grup WA.</div>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Hari Khusus -->
+  <div class="modal-bg" id="m-khusus">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="m-khusus-title">Tambah Hari Khusus</h3>
+        <button class="modal-close" onclick="closeModal('m-khusus')"><span class="ms">close</span></button>
+      </div>
+      <input type="hidden" id="fk-id">
+      <div style="display:flex;gap:12px">
+        <div class="input-wrap" style="flex:1"><label>Tanggal (1–31)</label><input type="number" id="fk-tgl" min="1" max="31"></div>
+        <div class="input-wrap" style="flex:1"><label>Bulan</label>
+          <select id="fk-bln">
+            <option value="">Semua Bulan (Rutinan)</option>
+            <option value="1">Januari</option>
+            <option value="2">Februari</option>
+            <option value="3">Maret</option>
+            <option value="4">April</option>
+            <option value="5">Mei</option>
+            <option value="6">Juni</option>
+            <option value="7">Juli</option>
+            <option value="8">Agustus</option>
+            <option value="9">September</option>
+            <option value="10">Oktober</option>
+            <option value="11">November</option>
+            <option value="12">Desember</option>
+          </select>
+        </div>
+      </div>
+      <div class="input-wrap"><label>Syarat Hari (Opsional)</label>
+        <select id="fk-hari">
+          <option value="">Semua Hari (Abaikan)</option>
+          <option value="1">Senin</option>
+          <option value="2">Selasa</option>
+          <option value="3">Rabu</option>
+          <option value="4">Kamis</option>
+          <option value="5">Jumat</option>
+          <option value="6">Sabtu</option>
+          <option value="0">Minggu</option>
+        </select>
+      </div>
+      <div class="input-wrap"><label>Pakaian</label><select id="fk-pak"></select></div>
+      <div class="input-wrap"><label>Keterangan / Nama Acara</label><input type="text" id="fk-ket" placeholder="contoh: HUT RI"></div>
+      <button class="btn btn-primary" style="width:100%" onclick="saveKhusus(this)">Simpan</button>
+    </div>
+  </div>
+
+  <!-- Modal List Master Kegiatan -->
+  <div class="modal-bg" id="m-master-kegiatan-list">
+    <div class="modal-box" style="max-width:600px;">
+      <div class="modal-header">
+        <h3 id="m-list-kegiatan-title">Daftar Master Kegiatan</h3>
+        <button class="modal-close" onclick="closeModal('m-master-kegiatan-list')"><span class="ms">close</span></button>
+      </div>
+      <div style="margin-bottom:16px;">
+        <button class="btn btn-primary btn-sm" onclick="openModal('m-kegiatan');clearMasterKegiatanForm()"><span class="ms" style="font-size:18px">add</span> Tambah Kegiatan Baru</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Nama Kegiatan</th><th>Deskripsi</th><th>Aksi</th></tr></thead>
+          <tbody id="tb-master-kegiatan"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Master Kegiatan -->
+  <div class="modal-bg" id="m-kegiatan">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="m-kegiatan-title">Tambah Kegiatan</h3>
+        <button class="modal-close" onclick="closeModal('m-kegiatan')"><span class="ms">close</span></button>
+      </div>
+      <input type="hidden" id="fkg-id">
+      <div class="input-wrap"><label>Nama Kegiatan</label><input type="text" id="fkg-nama" placeholder="contoh: Upacara Bendera"></div>
+      <div class="input-wrap"><label>Deskripsi (Opsional)</label><input type="text" id="fkg-desc" placeholder="contoh: Senam Pagi"></div>
+      <button class="btn btn-primary" style="width:100%" onclick="saveMasterKegiatan(this)">Simpan</button>
+    </div>
+  </div>
+
+  <!-- Modal Quick Edit -->
+  <div class="modal-bg" id="m-quickedit">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="mq-title">Ubah Pakaian</h3>
+        <button class="modal-close" onclick="closeModal('m-quickedit')"><span class="ms">close</span></button>
+      </div>
+      <input type="hidden" id="mq-y">
+      <input type="hidden" id="mq-m">
+      <input type="hidden" id="mq-d">
+      <input type="hidden" id="mq-id">
+      
+      <div class="input-wrap"><label>Pilih Pakaian</label><select id="mq-pak"></select></div>
+      <div class="input-wrap" style="display:flex; align-items:center; gap:8px; flex-direction:row; margin-top:-8px; margin-bottom:16px;">
+        <input type="checkbox" id="mq-libur" style="width:18px; height:18px; margin:0; cursor:pointer;" onchange="document.getElementById('mq-pak').disabled = this.checked">
+        <label for="mq-libur" style="margin:0; font-weight:600; cursor:pointer; color:var(--danger)">Tandai Sebagai Hari Libur</label>
+      </div>
+      <div class="input-wrap"><label>Keterangan / Alasan</label><input type="text" id="mq-ket" placeholder="contoh: Perubahan mendadak"></div>
+      
+      <div style="display:flex; gap:12px; margin-top:20px;">
+        <button class="btn btn-primary" style="flex:1" onclick="saveQuickEdit(this)">Simpan Perubahan</button>
+        <button class="btn btn-danger" style="display:none" id="mq-btn-del" onclick="deleteQuickEdit()" title="Kembalikan ke jadwal semula"><span class="ms" style="font-size:18px; margin-right:4px; vertical-align:middle">refresh</span> Reset Data</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Profil & Ganti Password -->
+  <div class="modal-bg" id="m-profil">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="m-profil-title">Profil Saya</h3>
+        <button class="modal-close" onclick="closeModal('m-profil')"><span class="ms">close</span></button>
+      </div>
+      <div class="input-wrap">
+        <label>Nama Sekolah / Instansi</label>
+        <input type="text" id="fpr-sekolah" placeholder="Contoh: SDN 1 Jakarta">
+      </div>
+      <div class="input-wrap">
+        <label>Nama Pengguna</label>
+        <input type="text" id="fpr-nama" placeholder="Nama lengkap Anda">
+      </div>
+      <div class="input-wrap" style="position:relative">
+        <label>Ganti Password Baru</label>
+        <input type="password" id="fpr-pass" placeholder="Biarkan kosong jika tidak ingin diganti" style="padding-right:40px;">
+        <span class="ms" id="fpr-eye" onclick="toggleEye('fpr-pass','fpr-eye')" style="position:absolute; right:12px; top:36px; cursor:pointer; color:var(--muted)">visibility_off</span>
+      </div>
+      <button class="btn btn-primary" style="width:100%" onclick="saveProfil(this)">Simpan Perubahan</button>
+    </div>
+  </div>
+
+
+
+  <!-- Full Screen Loading Overlay for Cloud Sync -->
+  <div id="cloud-sync-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; flex-direction:column; align-items:center; justify-content:center; color:#fff; backdrop-filter:blur(4px);">
+    <div style="width:50px; height:50px; border:4px solid rgba(255,255,255,0.3); border-top-color:#3b82f6; border-radius:50%; animation:spin 1s linear infinite; margin-bottom:16px;"></div>
+    <h3 style="margin:0; font-weight:600; font-size:18px;">Menyinkronkan Data...</h3>
+    <p style="font-size:13px; color:#cbd5e1; margin-top:8px;" id="cloud-sync-text">Mohon tunggu sebentar.</p>
+  </div>
+
+  <!-- =====================================================
+       JAVASCRIPT
+  ===================================================== -->
+  <script>
+    // GLOBAL ERROR CATCHER FOR DEBUGGING
+    window.onerror = function(msg, url, line, col, error) {
+      var errEl = document.getElementById('login-err');
+      if (errEl) {
+        errEl.textContent = 'Error: ' + msg + ' (Line ' + line + ')';
+        errEl.style.display = 'block';
+      }
+      return false; // Let it print to console too
+    };
+
+    // ================================================
+    // KONSTANTA AKUN & STATE SEKOLAH
+    // ================================================
+    
+    // URL Web App Google Apps Script
+    // MASUKKAN URL HASIL DEPLOY DI SINI
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyz6mbApBLAV1y1xVGY6twe08RYBQJ2iLJInIBSL8l38_GKj-gteyw4NzWF1BkrEKuB/exec"; 
+
+    var currentSekolahId = 'DEFAULT'; // State penyimpan sekolah aktif
+    var currentUserRole = '';
+    var currentAkun = null; // Menyimpan objek akun yang sedang login
+
+    var AKUN = [
+      {id:'ADM01', nama:'Super Admin',          nip:'-',                  username:'admin', password:'admin123', role:'SuperAdmin',   sekolahId:'ALL'},
+      {id:'GR01',  nama:'Admin SDN 1',          nip:'198001012010011001', username:'sdn1',  password:'sdn1',     role:'AdminSekolah', sekolahId:'SKL01'},
+      {id:'GR02',  nama:'Admin SMPN 1',         nip:'198205122014022003', username:'smpn2', password:'smpn2',    role:'AdminSekolah', sekolahId:'SKL02'}
+    ];
+
+    // ================================================
+    // SAFE STORAGE (Mendukung Multi-Tenant)
+    // ================================================
+    var _mem = {};
+    var store = {
+      get: function(k){ try{ return localStorage.getItem(k); }catch(e){ return _mem[k]||null; } },
+      set: function(k,v){ try{ localStorage.setItem(k,v); }catch(e){ _mem[k]=v; } },
+      remove: function(k){ try{ localStorage.removeItem(k); }catch(e){ delete _mem[k]; } }
+    };
+
+    var PFX = 'pdg_';
+    
+    // Fungsi untuk mendapatkan key storage yang spesifik untuk sekolah
+    function getTableKey(t) {
+      if(t === 'guru') return PFX + t; // Tabel guru bersifat global
+      var prefix = (currentSekolahId && currentSekolahId !== 'ALL') ? currentSekolahId + '_' : 'DEFAULT_';
+      return PFX + prefix + t;
+    }
+
+    function dbGet(t){ try{ return JSON.parse(store.get(getTableKey(t))||(t==='jadwal'||t==='kegiatan'?'{}':'[]')); }catch(e){ return (t==='jadwal'||t==='kegiatan'?'{}':'[]'); } }
+    
+    // Fungsi untuk mensinkronisasi (fetch) dari cloud saat aplikasi pertama kali dibuka
+    async function syncFromCloud() {
+      if(!APPS_SCRIPT_URL) return; // Jika belum diset, lewati
+      
+      var overlay = document.getElementById('cloud-sync-overlay');
+      var text = document.getElementById('cloud-sync-text');
+      if(overlay) overlay.style.display = 'flex';
+      
+      try {
+        var res = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'get_all' }),
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' } // Hindari preflight
+        });
+        var json = await res.json();
+        
+        if(json.status === 'success' && json.data) {
+          // Timpa localStorage dengan data dari Cloud
+          for(var key in json.data) {
+            store.set(key, json.data[key]);
+          }
+          if(text) text.textContent = "Data berhasil disinkronkan!";
+        } else {
+          console.error("Gagal sync:", json.message);
+          if(text) text.textContent = "Gagal mengambil data dari server.";
+        }
+      } catch (err) {
+        console.error("Network error sync:", err);
+        if(text) text.textContent = "Koneksi ke server gagal.";
+      }
+      
+      // Tunggu sebentar lalu tutup
+      await new Promise(r => setTimeout(r, 600));
+      if(overlay) overlay.style.display = 'none';
+    }
+
+    // Fungsi internal untuk sync satu key secara background
+    function syncSetCloud(key, value) {
+      if(!APPS_SCRIPT_URL) return;
+      fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'set', key: key, value: value }),
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+      }).catch(err => console.error("Gagal update cloud", err));
+    }
+
+    function dbSet(t,d){ 
+      store.set(getTableKey(t), JSON.stringify(d)); 
+      syncSetCloud(getTableKey(t), d); // Sync ke backend di background
+    }
+    
+    function dbSave(t,item){
+      var data = dbGet(t);
+      if(item.id){
+        var i = data.findIndex(function(d){ return d.id===item.id; });
+        if(i>-1) data[i]=item; else data.push(item);
+      } else { item.id='ID_'+Date.now(); data.push(item); }
+      dbSet(t,data);
+    }
+    
+    function dbDel(t,id){ dbSet(t, dbGet(t).filter(function(d){ return d.id!==id; })); }
+
+
+    // ================================================
+    // DATA DUMMY (di-seed sekali saja)
+    // ================================================
+    function seedData(){
+      // Seed untuk Sekolah 1
+      var tempId = currentSekolahId;
+      
+      currentSekolahId = 'SKL01';
+      if(!store.get(getTableKey('pakaian'))){
+        dbSet('pakaian',[
+          {id:'PK01',nama:'PDH Khaki',   warna:'#b8860b',desc:'Pakaian Dinas Harian Khaki',status:1, foto:''},
+          {id:'PK02',nama:'Batik',       warna:'#8b4513',desc:'Batik Khas Sekolah',         status:1, foto:''},
+          {id:'PK03',nama:'KORPRI',      warna:'#1e3a8a',desc:'Seragam KORPRI Resmi',       status:1, foto:''},
+          {id:'PK04',nama:'PGRI',        warna:'#374151',desc:'Seragam Hitam Putih PGRI',   status:1, foto:''},
+          {id:'PK05',nama:'Olahraga',    warna:'#1d4ed8',desc:'Kaos Olahraga Sekolah',      status:1, foto:''}
+        ]);
+        dbSet('jadwal',{ 
+          siklus: 5,
+          Senin: {1:'PK01',2:'PK01',3:'PK01',4:'PK01',5:'PK01'}, 
+          Selasa:{1:'PK01',2:'PK01',3:'PK01',4:'PK01',5:'PK01'},
+          Rabu:  {1:'PK04',2:'PK04',3:'PK04',4:'PK04',5:'PK04'},
+          Kamis: {1:'PK02',2:'PK02',3:'PK02',4:'PK02',5:'PK02'},
+          Jumat: {1:'PK05',2:'PK05',3:'PK05',4:'PK05',5:'PK05'}
+        });
+      }
+      if(!store.get(getTableKey('khusus')) || dbGet('khusus').length === 0){
+        // Coba cari ID pakaian KORPRI dan PGRI dari tabel pakaian saat ini
+        var pak = dbGet('pakaian');
+        var idKorpri = 'PK03', idPgri = 'PK04';
+        for(var i=0; i<pak.length; i++) {
+           if(pak[i].nama.toUpperCase().indexOf('KORPRI')>-1) idKorpri = pak[i].id;
+           if(pak[i].nama.toUpperCase().indexOf('PGRI')>-1) idPgri = pak[i].id;
+        }
+        dbSet('khusus', [
+          {id:'KHS_17', tgl:'17', bln:'', pakaianId:idKorpri, ket:'KORPRI'},
+          {id:'KHS_15', tgl:'15', bln:'', pakaianId:idPgri, ket:'PGRI'}
+        ]);
+      }
+
+      currentSekolahId = 'SKL02';
+      if(!store.get(getTableKey('pakaian'))){
+        dbSet('pakaian',[
+          {id:'PK01',nama:'PDH Khaki',   warna:'#b8860b',desc:'Pakaian Dinas Harian Khaki',status:1, foto:''},
+          {id:'PK02',nama:'Batik SMPN 1',warna:'#1d4ed8',desc:'Batik Biru',                 status:1, foto:''},
+          {id:'PK03',nama:'KORPRI',      warna:'#1e3a8a',desc:'Seragam KORPRI Resmi',       status:1, foto:''},
+          {id:'PK04',nama:'PGRI',        warna:'#374151',desc:'Seragam Hitam Putih PGRI',   status:1, foto:''}
+        ]);
+        dbSet('jadwal',{ 
+          siklus: 5,
+          Senin: {1:'PK01',2:'PK01',3:'PK01',4:'PK01',5:'PK01'}, 
+          Rabu:  {1:'PK04',2:'PK04',3:'PK04',4:'PK04',5:'PK04'} 
+        });
+      }
+      if(!store.get(getTableKey('khusus')) || dbGet('khusus').length === 0){
+        var pak2 = dbGet('pakaian');
+        var idKorpri2 = 'PK03', idPgri2 = 'PK04';
+        for(var i=0; i<pak2.length; i++) {
+           if(pak2[i].nama.toUpperCase().indexOf('KORPRI')>-1) idKorpri2 = pak2[i].id;
+           if(pak2[i].nama.toUpperCase().indexOf('PGRI')>-1) idPgri2 = pak2[i].id;
+        }
+        dbSet('khusus', [
+          {id:'KHS_17', tgl:'17', bln:'', pakaianId:idKorpri2, ket:'KORPRI'},
+          {id:'KHS_15', tgl:'15', bln:'', pakaianId:idPgri2, ket:'PGRI'}
+        ]);
+      }
+
+      currentSekolahId = tempId; // Restore
+
+      // Guru dari AKUN (agar sinkron)
+      if(!store.get(PFX+'guru')){
+        dbSet('guru', AKUN.map(function(a){
+          return {id:a.id,nip:a.nip,nama:a.nama,username:a.username,status:1};
+        }));
+      }
+    }
+
+    // ================================================
+    // HELPERS
+    // ================================================
+    var HARI  = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    var BULAN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+    // Helper untuk mengetahui minggu ke berapa dalam siklus
+    function weekOfMonth(d){
+      var first = new Date(d.getFullYear(), d.getMonth(), 1).getDay();
+      if(first===0) first=7; // 1=Senin, 7=Minggu
+      
+      // Hitung ini masuk minggu ke berapa di kalender
+      var w = Math.ceil((d.getDate() + first - 1) / 7);
+      
+      var jadwal = dbGet('jadwal');
+      var siklus = jadwal.siklus || 4; // Ambil nilai siklus (default 4)
+      
+      // Pola siklus mingguan
+      var weekCycle = ((w - 1) % siklus) + 1;
+      return weekCycle;
+    }
+
+    function todayUniform(d){
+      d = d||new Date();
+      var tgl = d.getDate(), bln = d.getMonth()+1;
+      var namaHari = HARI[d.getDay()];
+      var wk = weekOfMonth(d);
+      var pakaian = dbGet('pakaian');
+      
+      function getPak(id){ 
+        var pak = pakaian.find(function(p){return p.id===id;});
+        if(!pak) return {nama:'Belum diatur',warna:'#64748b',desc:''};
+        return pak;
+      }
+
+      var defaultJadwal = dbGet('jadwal');
+      var monthJadwal = dbGet('jadwal_bln_' + bln);
+      var jadwal = (monthJadwal && Object.keys(monthJadwal).length > 0) ? monthJadwal : defaultJadwal;
+      
+      var defaultKeg = dbGet('kegiatan');
+      var monthKeg = dbGet('kegiatan_bln_' + bln);
+      var kegIdObj = (monthKeg && Object.keys(monthKeg).length > 0) ? monthKeg : defaultKeg;
+      
+      var mk = dbGet('master_kegiatan');
+      var kId = kegIdObj[namaHari] && kegIdObj[namaHari][wk] ? kegIdObj[namaHari][wk] : '';
+      var namaKegiatan = '';
+      if(kId) {
+        var findK = mk.find(function(m){ return m.id === kId; });
+        if(findK) namaKegiatan = findK.nama;
+      }
+
+      var isSabtuLibur = (d.getDay()===6 && !jadwal.includeSabtu);
+      var isMingguLibur = (d.getDay()===0 && !jadwal.includeMinggu);
+      var isNonKerja = isSabtuLibur || isMingguLibur;
+
+      // Prioritas 1: Hari Khusus Exact (ada Tahun, biasanya dari Quick Edit Kalender)
+      var yearNow = d.getFullYear();
+      var dHari = d.getDay();
+      var allKhusus = dbGet('khusus');
+      
+      var hkExact = allKhusus.find(function(k){ 
+         var matchHari = (k.hari !== undefined && k.hari !== '') ? (+k.hari === dHari) : true;
+         return +k.tgl===tgl && +k.bln===bln && +k.thn===yearNow && matchHari; 
+      });
+
+      if(hkExact) {
+         if (hkExact.isLibur) {
+            return {type:'libur', label:'Hari Libur', pakaian:{nama:'Libur',warna:'transparent',desc:'Tidak ada jadwal seragam'}, wk:wk, hari:namaHari, kegiatan:hkExact.ket};
+         }
+         return {type:'khusus', label:hkExact.ket, pakaian:getPak(hkExact.pakaianId), wk:wk, hari:namaHari, kegiatan:hkExact.ket};
+      }
+
+      // Prioritas 2: Libur Akhir Pekan (jika sekolah off di hari tsb)
+      // Jika sekolah libur hari ini, maka jadwal rutinan (bulanan/tahunan) diabaikan.
+      if (isNonKerja) {
+         return {type:'libur', label:'Hari Libur', pakaian:{nama:'Libur',warna:'#ef4444',desc:'Tidak ada jadwal seragam'}, wk:wk, hari:namaHari, kegiatan:''};
+      }
+
+      // Prioritas 3: Hari Khusus Rutinan (tanpa Tahun, dari Master Admin)
+      var hkRoutine = allKhusus.find(function(k){ 
+         if (k.thn) return false; // Lewati yang spesifik tahun
+         var matchBln = k.bln ? (+k.bln === bln) : true;
+         var matchHari = (k.hari !== undefined && k.hari !== '') ? (+k.hari === dHari) : true;
+         return +k.tgl===tgl && matchBln && matchHari; 
+      });
+
+      if(hkRoutine) {
+         if (hkRoutine.isLibur) {
+            return {type:'libur', label:'Hari Libur', pakaian:{nama:'Libur',warna:'transparent',desc:'Tidak ada jadwal seragam'}, wk:wk, hari:namaHari, kegiatan:hkRoutine.ket};
+         }
+         return {type:'khusus', label:hkRoutine.ket, pakaian:getPak(hkRoutine.pakaianId), wk:wk, hari:namaHari, kegiatan:hkRoutine.ket};
+      }
+
+      // Prioritas 4: Jadwal Mingguan Biasa
+      if(jadwal[namaHari] && jadwal[namaHari][wk])
+        return {type:'mingguan', label:'Jadwal Minggu ke-'+wk, pakaian:getPak(jadwal[namaHari][wk]), wk:wk, hari:namaHari, kegiatan:namaKegiatan};
+
+      return {type:'unknown', label:'Belum diatur', pakaian:{nama:'Belum diatur',warna:'#64748b',desc:'Hubungi admin'}, wk:wk, hari:namaHari, kegiatan:namaKegiatan};
+    }
+
+    // ================================================
+    // SPA ROUTING
+    // ================================================
+    function showView(id){
+      var all = document.querySelectorAll('.view');
+      for(var i=0;i<all.length;i++){
+        all[i].style.display = 'none'; // Paksa sembunyikan semua
+        all[i].classList.remove('active');
+      }
+      
+      var el = document.getElementById(id);
+      if(el){
+        // Kembalikan display sesuai kebutuhan layout-nya
+        if(id === 'admin-view' || id === 'login-view' || id === 'register-view' || id === 'publik-view'){
+          el.style.display = 'flex';
+        } else {
+          el.style.display = 'block';
+        }
+        el.classList.add('active');
+      }
+    }
+
+    function toggleSidebar(){
+      var sb = document.getElementById('sidebar');
+      var ov = document.getElementById('sidebar-overlay');
+      if(!sb || !ov) return;
+      if(window.innerWidth >= 768) {
+        sb.classList.toggle('closed-pc');
+      } else {
+        sb.classList.toggle('open');
+        ov.classList.toggle('open');
+      }
+    }
+
+    function openTab(tab, el){
+      store.set('pdg_active_tab', tab);
+      
+      if(window.innerWidth < 768) {
+        var sb = document.getElementById('sidebar');
+        var ov = document.getElementById('sidebar-overlay');
+        if(sb) sb.classList.remove('open');
+        if(ov) ov.classList.remove('open');
+      }
+
+      
+      var tabs = document.querySelectorAll('.admin-tab');
+      for(var i=0;i<tabs.length;i++) tabs[i].classList.remove('active');
+      document.getElementById('tab-'+tab).classList.add('active');
+
+      // Highlight nav
+      var navs = document.querySelectorAll('.nav-link,.bn-item');
+      for(var i=0;i<navs.length;i++) navs[i].classList.remove('active');
+      
+      if(el){
+        // Find matching in both sidebars
+        for(var i=0;i<navs.length;i++){
+          if(navs[i].textContent.trim().startsWith(el.textContent.trim().split('\n')[0].trim()))
+            navs[i].classList.add('active');
+        }
+        el.classList.add('active');
+      } else {
+        // Fallback untuk onload
+        for(var i=0;i<navs.length;i++){
+          var oc = navs[i].getAttribute('onclick') || '';
+          if(oc.indexOf("openTab('"+tab+"'") !== -1) {
+            navs[i].classList.add('active');
+          }
+        }
+      }
+
+      var calContainer = document.getElementById('shared-kalender-container');
+      if(calContainer) {
+        if(tab === 'jadwal' || tab === 'kegiatan') {
+           calContainer.style.display = 'block';
+        } else {
+           calContainer.style.display = 'none';
+        }
+      }
+
+      if(tab==='dash')    renderDash();
+      if(tab==='guru')    renderGuru();
+      if(tab==='pakaian') renderPakaian();
+      if(tab==='jadwal') { renderMasterKegiatan(); renderJadwal(); }
+      if(tab==='khusus')  renderKhusus();
+    }
+
+    // ================================================
+    // AUTH
+    // ================================================
+    function doLogin(){
+      var u = (document.getElementById('login-user').value||'').trim();
+      var p = (document.getElementById('login-pass').value||'').trim();
+      var errEl = document.getElementById('login-err');
+      errEl.style.display='none';
+
+      if(!u||!p){ errEl.textContent='Username dan password wajib diisi.'; errEl.style.display='block'; return; }
+
+      var akun = null;
+      // 1. Cek di daftar akun statis/hardcoded (Super Admin & Demo)
+      for(var i=0;i<AKUN.length;i++){
+        if(AKUN[i].username===u && AKUN[i].password===p){ akun=AKUN[i]; break; }
+      }
+      
+      // 2. Jika tidak ketemu, cek di database guru hasil registrasi mandiri
+      if(!akun) {
+        var allGuru = dbGet('guru');
+        for(var i=0;i<allGuru.length;i++){
+          if(allGuru[i].username===u && allGuru[i].password===p){ akun=allGuru[i]; break; }
+        }
+      }
+
+      if(!akun){ errEl.textContent='Username atau password salah!'; errEl.style.display='block'; return; }
+
+      currentAkun = akun; // Set state global
+      
+      // Simpan sesi ke local storage
+      store.set('pdg_session', JSON.stringify(akun));
+
+      currentSekolahId = akun.sekolahId;
+      currentUserRole = akun.role || 'AdminSekolah';
+
+      // Batasi menu untuk Admin Sekolah
+      var mGuruD = document.getElementById('menu-guru-desktop');
+      var mGuruM = document.getElementById('menu-guru-mobile');
+      if (currentUserRole === 'AdminSekolah') {
+        if(mGuruD) mGuruD.style.display = 'none';
+        if(mGuruM) mGuruM.style.display = 'none';
+      } else {
+        if(mGuruD) mGuruD.style.display = 'flex';
+        if(mGuruM) mGuruM.style.display = 'flex';
+      }
+
+      showView('admin-view');
+      renderDash();
+      toast('Selamat datang, '+akun.nama+'!','success');
+    }
+
+    function doRegister() {
+      var nama = (document.getElementById('reg-nama').value||'').trim();
+      var user = (document.getElementById('reg-user').value||'').trim();
+      var email = (document.getElementById('reg-email').value||'').trim();
+      var wa = (document.getElementById('reg-wa').value||'').trim();
+      var sekolah = (document.getElementById('reg-sekolah').value||'').trim();
+      var pass = (document.getElementById('reg-pass').value||'').trim();
+      
+      var errEl = document.getElementById('register-err');
+      errEl.style.display = 'none';
+
+      if(!nama || !user || !sekolah || !pass) {
+        errEl.textContent = 'Nama, Username, Sekolah, dan Password wajib diisi!';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      // Pastikan username belum dipakai
+      var allGuru = dbGet('guru');
+      var exists = allGuru.find(function(g){ return g.username === user; }) || AKUN.find(function(a){ return a.username === user; });
+      if(exists) {
+        errEl.textContent = 'Username sudah terdaftar, silakan gunakan yang lain.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      // Format nama sekolah menjadi ID sekolah
+      var sId = sekolah.toUpperCase().replace(/[^A-Z0-9]+/g, '_');
+
+      var newGuru = {
+        id: 'GR_' + Date.now(),
+        nama: nama,
+        username: user,
+        password: pass, // Disimpan plain text untuk versi demo lokal ini
+        email: email,
+        wa: wa,
+        sekolah: sekolah,
+        sekolahId: sId,
+        role: 'AdminSekolah',
+        status: 1
+      };
+
+      allGuru.push(newGuru);
+      dbSet('guru', allGuru); // Simpan ke database guru lokal
+
+      // Buat Draf Master Pakaian & Jadwal untuk Sekolah Baru Ini
+      var tempId = currentSekolahId;
+      currentSekolahId = sId; // Beralih ke konteks sekolah baru
+
+      dbSet('pakaian',[
+        {id:'PK01',nama:'PDH Khaki',   warna:'#b8860b',desc:'Pakaian Dinas Harian Khaki',status:1, foto:''},
+        {id:'PK02',nama:'Batik',       warna:'#8b4513',desc:'Batik Khas Sekolah',         status:1, foto:''},
+        {id:'PK03',nama:'KORPRI',      warna:'#1e3a8a',desc:'Seragam KORPRI Resmi',       status:1, foto:''},
+        {id:'PK04',nama:'PGRI',        warna:'#374151',desc:'Seragam Hitam Putih PGRI',   status:1, foto:''},
+        {id:'PK05',nama:'Olahraga',    warna:'#1d4ed8',desc:'Kaos Olahraga Sekolah',      status:1, foto:''}
+      ]);
+      
+      dbSet('jadwal',{
+        siklus: 5,
+        Senin: {1:'PK01',2:'PK01',3:'PK01',4:'PK01',5:'PK01'},
+        Selasa:{1:'PK01',2:'PK01',3:'PK01',4:'PK01',5:'PK01'},
+        Rabu:  {1:'PK04',2:'PK04',3:'PK04',4:'PK04',5:'PK04'},
+        Kamis: {1:'PK02',2:'PK02',3:'PK02',4:'PK02',5:'PK02'},
+        Jumat: {1:'PK05',2:'PK05',3:'PK05',4:'PK05',5:'PK05'}
+      });
+
+      currentSekolahId = tempId; // Kembalikan ke konteks semula
+
+      toast('Registrasi berhasil! Silakan login.', 'success');
+      showView('login-view');
+      
+      // Auto-fill form login
+      document.getElementById('login-user').value = user;
+      document.getElementById('login-pass').value = '';
+      
+      // Bersihkan form registrasi
+      document.getElementById('reg-nama').value = '';
+      document.getElementById('reg-user').value = '';
+      document.getElementById('reg-email').value = '';
+      document.getElementById('reg-wa').value = '';
+      document.getElementById('reg-sekolah').value = '';
+      document.getElementById('reg-pass').value = '';
+    }
+
+    function doLoginGuru(id){
+      var akun = AKUN.find(function(a){ return a.id===id; });
+      if(akun) currentSekolahId = akun.sekolahId;
+      else currentSekolahId = 'SKL01'; // Default demo
+      
+      document.getElementById('guru-name').textContent = akun ? akun.nama : 'Publik Sekolah';
+      document.getElementById('guru-nip').textContent  = akun ? 'Operator' : '';
+      showView('guru-view');
+      renderGuruCard();
+      toast('Menampilkan tampilan Publik','success');
+    }
+
+    function doLogout(){
+      store.remove('pdg_session');
+      showView('login-view');
+      document.getElementById('login-user').value='';
+      document.getElementById('login-pass').value='';
+      document.getElementById('login-err').style.display='none';
+    }
+
+    // ================================================
+    // GURU CARD
+    // ================================================
+    function renderGuruCard(){
+      var now = new Date();
+      var info = todayUniform(now);
+
+      document.getElementById('hari-ini-tgl').textContent =
+        HARI[now.getDay()]+', '+now.getDate()+' '+BULAN[now.getMonth()]+' '+now.getFullYear();
+      document.getElementById('hari-ini-minggu').textContent = 'Minggu ke-'+info.wk+' bulan ini';
+
+      var card  = document.getElementById('uniform-card');
+      var badge = document.getElementById('uniform-badge');
+      var name  = document.getElementById('uniform-name');
+      var desc  = document.getElementById('uniform-desc');
+
+      if(info.pakaian.foto) {
+        card.style.backgroundImage = 'url(' + info.pakaian.foto + ')';
+        card.style.backgroundColor = '#000'; // fallback
+      } else {
+        card.style.backgroundImage = 'none';
+        card.style.backgroundColor = info.pakaian.warna||'#2563eb';
+      }
+
+      badge.textContent = info.label;
+      badge.className = 'uniform-badge'+(info.type==='khusus'?' khusus':'');
+      name.textContent = info.pakaian.nama;
+      
+      var kegHtml = info.kegiatan ? '<div style="font-size:16px; font-weight:700; margin-top:4px; opacity:0.95;">📌 ' + info.kegiatan + '</div>' : '';
+      desc.innerHTML = kegHtml + '<div style="margin-top:4px; opacity:0.8">' + (info.pakaian.desc||'') + '</div>';
+
+      // Auto-contrast teks jika tidak ada gambar
+      if(!info.pakaian.foto) {
+        var hex = (info.pakaian.warna||'#000').replace('#','');
+        var r=parseInt(hex.substr(0,2),16), g=parseInt(hex.substr(2,2),16), b=parseInt(hex.substr(4,2),16);
+        var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+        var contentEl = card.querySelector('.uniform-content');
+        if(contentEl) contentEl.style.color = lum>0.55 ? '#0f172a' : '#ffffff';
+      } else {
+        var contentEl = card.querySelector('.uniform-content');
+        if(contentEl) contentEl.style.color = '#ffffff'; // Gambar digelapkan oleh CSS gradient
+      }
+    }
+
+    // ================================================
+    // QUICK EDIT (CALENDAR)
+    // ================================================
+    function openQuickEdit(y, m, d) {
+       // Hanya admin yang bisa klik
+       if(!currentAkun || currentAkun.role !== 'AdminSekolah') return;
+       
+       var dateObj = new Date(y, m, d);
+       var info = todayUniform(dateObj);
+       
+       document.getElementById('mq-title').textContent = 'Ubah: ' + HARI[dateObj.getDay()] + ', ' + d + ' ' + BULAN[m] + ' ' + y;
+       document.getElementById('mq-y').value = y;
+       document.getElementById('mq-m').value = m;
+       document.getElementById('mq-d').value = d;
+       
+       // Populate select
+       var pak = dbGet('pakaian');
+       var opts = pak.map(function(p){ return '<option value="'+p.id+'">'+p.nama+'</option>'; }).join('');
+       var sel = document.getElementById('mq-pak');
+       sel.innerHTML = opts;
+       
+       // Cek apakah ada override khusus (exact match)
+       var allKhusus = dbGet('khusus');
+       var dHari = dateObj.getDay();
+       var hkExact = allKhusus.find(function(k){ 
+          var matchHari = (k.hari !== undefined && k.hari !== '') ? (+k.hari === dHari) : true;
+          return +k.tgl===d && +k.bln===(m+1) && +k.thn===y && matchHari; 
+       });
+       // Atau adakah rule wildcard yg kena di hari ini
+       var hkWildcard = allKhusus.find(function(k){ 
+          var matchThn = k.thn ? (+k.thn === y) : true;
+          var matchBln = k.bln ? (+k.bln === (m+1)) : true;
+          var matchHari = (k.hari !== undefined && k.hari !== '') ? (+k.hari === dHari) : true;
+          return +k.tgl===d && matchBln && matchThn && matchHari; 
+       });
+       var hk = hkExact || hkWildcard;
+       
+       if(hk) {
+          sel.value = hk.pakaianId;
+          document.getElementById('mq-ket').value = hk.ket;
+          // Hanya jika ini edit data persis tgl tersebut, kita masukkan ID nya untuk bisa di-replace/dihapus
+          // Jika yg muncul adalah wildcard (misal 17an tiap bulan), kita tidak beri ID agar jadi data baru jika di-save
+          document.getElementById('mq-id').value = hkExact ? hk.id : '';
+          document.getElementById('mq-libur').checked = !!hk.isLibur;
+          sel.disabled = !!hk.isLibur;
+       } else {
+          sel.value = info.pakaian.id || (pak.length > 0 ? pak[0].id : '');
+          document.getElementById('mq-ket').value = 'Perubahan Mendadak';
+          document.getElementById('mq-id').value = '';
+          document.getElementById('mq-libur').checked = false;
+          sel.disabled = false;
+       }
+       document.getElementById('mq-btn-del').style.display = 'block';
+       
+       openModal('m-quickedit');
+    }
+    
+    function saveQuickEdit(btn) {
+       var y = parseInt(document.getElementById('mq-y').value);
+       var m = parseInt(document.getElementById('mq-m').value);
+       var d = parseInt(document.getElementById('mq-d').value);
+       var pakId = document.getElementById('mq-pak').value;
+       var ket = document.getElementById('mq-ket').value.trim() || 'Perubahan Mendadak';
+       var editId = document.getElementById('mq-id').value;
+       var isLibur = document.getElementById('mq-libur').checked;
+       
+       var khusus = dbGet('khusus');
+       if (editId) {
+          var idx = khusus.findIndex(function(k){ return k.id === editId; });
+          if (idx !== -1) {
+             khusus[idx].pakaianId = pakId;
+             khusus[idx].ket = ket;
+             khusus[idx].thn = y; // Jadikan spesifik tahun ini
+             khusus[idx].isLibur = isLibur;
+          }
+       } else {
+          khusus.push({
+             id: 'KH_' + Date.now(),
+             tgl: d,
+             bln: m + 1,
+             thn: y,
+             pakaianId: pakId,
+             ket: ket,
+             isLibur: isLibur
+          });
+       }
+       dbSet('khusus', khusus);
+       
+       renderKalender();
+       renderDash();
+       if(document.getElementById('tb-khusus')) renderKhusus();
+       
+       toast('Perubahan berhasil disimpan', 'success');
+       saveSuccessBtn(btn, 'm-quickedit');
+    }
+    
+    function deleteQuickEdit() {
+       var editId = document.getElementById('mq-id').value;
+       if(!editId) {
+          closeModal('m-quickedit');
+          toast('Tidak ada data khusus/perubahan di tanggal ini', 'info');
+          return;
+       }
+       if(!confirm('Hapus perubahan pada hari ini dan kembalikan ke jadwal semula?')) return;
+       
+       var khusus = dbGet('khusus');
+       var idx = khusus.findIndex(function(k){ return k.id === editId; });
+       if(idx !== -1) khusus.splice(idx, 1);
+       dbSet('khusus', khusus);
+       
+       closeModal('m-quickedit');
+       renderKalender();
+       renderDash();
+       if(document.getElementById('tb-khusus')) renderKhusus();
+       
+       toast('Perubahan dihapus', 'success');
+    }
+
+    // ================================================
+    // ADMIN RENDERERS
+    // ================================================
+    function renderDash(){
+      var guru = dbGet('guru'), pak = dbGet('pakaian');
+      document.getElementById('s-guru').textContent = guru.length;
+      document.getElementById('s-pakaian').textContent = pak.length;
+      
+      var now = new Date();
+      var info = todayUniform(now);
+      
+      document.getElementById('s-today').textContent = info.pakaian.nama;
+      document.getElementById('s-today-type').textContent = info.label;
+      
+      // Banner
+      document.getElementById('admin-today-date').textContent = HARI[now.getDay()]+', '+now.getDate()+' '+BULAN[now.getMonth()]+' '+now.getFullYear() + ' (Minggu ke-'+info.wk+')';
+      
+      var thumb = document.getElementById('admin-today-thumb');
+      if(info.pakaian.foto) {
+        thumb.style.backgroundImage = 'url(' + info.pakaian.foto + ')';
+        thumb.style.backgroundColor = '#000';
+      } else {
+        thumb.style.backgroundImage = 'none';
+        thumb.style.backgroundColor = info.pakaian.warna||'#2563eb';
+      }
+      
+      var badge = document.getElementById('admin-today-badge');
+      badge.textContent = info.label;
+      if(info.type==='khusus') {
+        badge.style.background = 'rgba(236,72,153,0.1)';
+        badge.style.color = '#ec4899';
+      } else if(info.type==='libur') {
+        badge.style.background = 'rgba(239,68,68,0.1)';
+        badge.style.color = 'var(--danger)';
+      } else {
+        badge.style.background = 'rgba(99,102,241,0.1)';
+        badge.style.color = 'var(--primary)';
+      }
+      
+      document.getElementById('admin-today-name').textContent = info.pakaian.nama;
+      var kegHtml = info.kegiatan ? '<div style="font-size:16px; font-weight:700; margin-bottom:8px; opacity:0.95;">📌 ' + info.kegiatan + '</div>' : '';
+      document.getElementById('admin-today-desc').innerHTML = kegHtml + (info.pakaian.desc||'');
+    }
+
+    function renderGuru(){
+      var data = dbGet('guru');
+      document.getElementById('tb-guru').innerHTML = data.map(function(d){
+        return '<tr>'+
+          '<td>'+d.nip+'</td>'+
+          '<td>'+d.nama+'</td>'+
+          '<td>'+d.username+'</td>'+
+          '<td><span class="badge '+(d.status?'badge-ok':'badge-off')+'">'+(d.status?'Aktif':'Nonaktif')+'</span></td>'+
+          '<td style="display:flex;gap:6px">'+
+            '<button class="btn btn-outline btn-sm" onclick="editGuru(\''+d.id+'\')">Edit</button>'+
+            '<button class="btn btn-danger btn-sm" onclick="delRow(\'guru\',\''+d.id+'\')">Hapus</button>'+
+          '</td>'+
+        '</tr>';
+      }).join('');
+    }
+
+    function renderPakaian(){
+      var data = dbGet('pakaian');
+      document.getElementById('tb-pakaian').innerHTML = data.map(function(d){
+        var thumb = d.foto 
+            ? '<div style="width:36px;height:36px;border-radius:6px;background:url('+d.foto+') center/cover"></div>' 
+            : '<div style="width:36px;height:36px;border-radius:6px;background:'+d.warna+'"></div>';
+        return '<tr>'+
+          '<td>'+thumb+'</td>'+
+          '<td><div style="font-weight:600">'+d.nama+'</div></td>'+
+          '<td>'+(d.desc||'-')+'</td>'+
+          '<td><span class="badge '+(d.status?'badge-ok':'badge-off')+'">'+(d.status?'Aktif':'Nonaktif')+'</span></td>'+
+          '<td style="display:flex;gap:6px">'+
+            '<button class="btn btn-outline btn-sm" onclick="editPakaian(\''+d.id+'\')">Edit</button>'+
+            '<button class="btn btn-danger btn-sm" onclick="delRow(\'pakaian\',\''+d.id+'\')">Hapus</button>'+
+          '</td>'+
+        '</tr>';
+      }).join('');
+    }
+
+    var activeJadwalBulan = 'ALL';
+
+    function renderJadwal(){
+      var pak = dbGet('pakaian');
+      var mk = dbGet('master_kegiatan');
+      
+      var jadwal = dbGet('jadwal');
+      var kegiatan = dbGet('kegiatan');
+      
+      var statusLbl = document.getElementById('lbl-jadwal-status');
+      var btnReset = document.getElementById('btn-reset-jadwal');
+      
+      if(activeJadwalBulan !== 'ALL') {
+         var bJadwal = dbGet('jadwal_bln_' + activeJadwalBulan);
+         var bKegiatan = dbGet('kegiatan_bln_' + activeJadwalBulan);
+         if(bJadwal && Object.keys(bJadwal).length > 0) {
+            jadwal = bJadwal;
+            kegiatan = bKegiatan;
+            if(statusLbl) statusLbl.textContent = 'Menggunakan jadwal khusus bulan ' + BULAN[parseInt(activeJadwalBulan)-1];
+            if(btnReset) btnReset.style.display = 'block';
+         } else {
+            // Fallback to default but let user know
+            if(statusLbl) statusLbl.textContent = 'Belum ada jadwal khusus, menyalin dari Default.';
+            if(btnReset) btnReset.style.display = 'none';
+         }
+      } else {
+         if(statusLbl) statusLbl.textContent = 'Menampilkan jadwal Default.';
+         if(btnReset) btnReset.style.display = 'none';
+      }
+      
+      var siklus = jadwal.siklus || 5;
+      
+      // Sinkronkan UI Checkbox dan Select dengan data jadwal
+      var chkSabtu = document.getElementById('chk-sabtu');
+      var chkMinggu = document.getElementById('chk-minggu');
+      var selSiklus = document.getElementById('sel-siklus');
+      var lblInfo = document.getElementById('lbl-siklus-info');
+      
+      if(chkSabtu) chkSabtu.checked = !!jadwal.includeSabtu;
+      if(chkMinggu) chkMinggu.checked = !!jadwal.includeMinggu;
+      if(selSiklus) selSiklus.value = siklus;
+      if(lblInfo) {
+        lblInfo.textContent = siklus == 4 
+          ? '*Jika bulan memiliki 5 minggu, maka minggu ke-5 akan mengulang jadwal minggu ke-1. Bulan berikutnya kembali reset ke minggu ke-1.'
+          : '*Jika bulan memiliki 5 minggu, akan memakai jadwal minggu ke-5. Jika hanya 4 minggu, minggu ke-5 diabaikan. Bulan berikutnya kembali reset ke minggu ke-1.';
+      }
+
+      var optsPak = pak.map(function(p){ return '<option value="'+p.id+'" data-warna="'+(p.warna||'#2563eb')+'">'+p.nama+'</option>'; }).join('');
+      var optsKeg = mk.map(function(k){ return '<option value="'+k.id+'">'+k.nama+'</option>'; }).join('');
+      
+      var hariKerja = ['Senin','Selasa','Rabu','Kamis','Jumat']; // Default
+      if(jadwal.includeSabtu) hariKerja.push('Sabtu');
+      if(jadwal.includeMinggu) hariKerja.push('Minggu');
+
+      var styleHtml = '<style>' +
+        '.col-even { background-color: rgba(0,0,0,0.04) !important; } ' +
+        '[data-theme="dark"] .col-even { background-color: rgba(255,255,255,0.04) !important; } ' +
+        '.head-baju { background-color: rgba(59,130,246,0.12) !important; color: #1d4ed8; font-weight: 700; } ' +
+        '[data-theme="dark"] .head-baju { background-color: rgba(59,130,246,0.2) !important; color: #93c5fd; } ' +
+        '.head-keg { background-color: rgba(245,158,11,0.12) !important; color: #b45309; font-weight: 700; } ' +
+        '[data-theme="dark"] .head-keg { background-color: rgba(245,158,11,0.2) !important; color: #fcd34d; } ' +
+        '.col-baju { background-color: rgba(59,130,246,0.03); } ' +
+        '[data-theme="dark"] .col-baju { background-color: rgba(59,130,246,0.06); } ' +
+        '.col-keg { background-color: rgba(245,158,11,0.03); } ' +
+        '[data-theme="dark"] .col-keg { background-color: rgba(245,158,11,0.06); } ' +
+        '</style>';
+      var html = styleHtml + '<div class="sg-head" style="grid-row: span 2; display:flex; align-items:center; justify-content:center; background:var(--primary); color:#fff; font-weight:800;">Hari</div>';
+      var weekColors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+      for(var w=1; w<=siklus; w++){
+        var bg = weekColors[(w-1)%weekColors.length];
+        html += '<div class="sg-head" style="grid-column: span 2; background:'+bg+'; color:#fff; font-weight:800;">Minggu '+w+'</div>';
+      }
+      
+      for(var w=1; w<=siklus; w++){
+         html += '<div class="sg-head head-baju" style="font-size:11px; padding:6px;">Baju</div>';
+         html += '<div class="sg-head head-keg" style="font-size:11px; padding:6px;">Kegiatan</div>';
+      }
+
+      hariKerja.forEach(function(h){
+        html += '<div class="sg-row">'+h+'</div>';
+        for(var w=1;w<=siklus;w++){
+          var extCls = (w % 2 === 0) ? ' col-even' : '';
+          html += '<div class="sg-cell col-baju' + extCls + '" style="padding:4px"><select class="sel-pak" data-h="'+h+'" data-w="'+w+'" onchange="updatePreview(); updateBajuColor(this)"><option value="" data-warna="">-Baju-</option>'+optsPak+'</select></div>';
+          html += '<div class="sg-cell col-keg' + extCls + '" style="padding:4px"><select class="sel-keg" data-h="'+h+'" data-w="'+w+'" onchange="updatePreview()"><option value="">-Kegiatan-</option>'+optsKeg+'</select></div>';
+        }
+      });
+      var grid = document.getElementById('sched-grid');
+      grid.style.gridTemplateColumns = '110px repeat('+(siklus*2)+', minmax(100px, 1fr))';
+      grid.innerHTML = html;
+      
+      // Set values
+      var selsPak = grid.querySelectorAll('.sel-pak');
+      for(var i=0;i<selsPak.length;i++){
+        var h=selsPak[i].getAttribute('data-h'), w=selsPak[i].getAttribute('data-w');
+        if(jadwal[h]&&jadwal[h][w]) selsPak[i].value=jadwal[h][w];
+        updateBajuColor(selsPak[i]);
+      }
+      var selsKeg = grid.querySelectorAll('.sel-keg');
+      for(var i=0;i<selsKeg.length;i++){
+        var h=selsKeg[i].getAttribute('data-h'), w=selsKeg[i].getAttribute('data-w');
+        if(kegiatan[h]&&kegiatan[h][w]) selsKeg[i].value=kegiatan[h][w];
+      }
+      
+      // Update kalender visual
+      renderKalender();
+    }
+
+    function changeJadwalBulan() {
+      var sel = document.getElementById('sel-jadwal-bulan');
+      if(sel) activeJadwalBulan = sel.value;
+      renderJadwal();
+    }
+
+    function resetJadwalBulan() {
+      if(activeJadwalBulan === 'ALL') return;
+      if(!confirm('Anda yakin ingin menghapus jadwal khusus bulan ini dan kembali menggunakan Default?')) return;
+      dbSet('jadwal_bln_' + activeJadwalBulan, {});
+      dbSet('kegiatan_bln_' + activeJadwalBulan, {});
+      toast('Jadwal bulan ini di-reset ke Default', 'success');
+      renderJadwal();
+    }
+
+    function renderMasterKegiatan(){
+      var data = dbGet('master_kegiatan');
+      document.getElementById('tb-master-kegiatan').innerHTML = data.map(function(d){
+        return '<tr>'+
+          '<td><div style="font-weight:600">'+d.nama+'</div></td>'+
+          '<td>'+(d.desc||'-')+'</td>'+
+          '<td style="display:flex;gap:6px">'+
+            '<button class="btn btn-outline btn-sm" onclick="editMasterKegiatan(\''+d.id+'\')">Edit</button>'+
+            '<button class="btn btn-danger btn-sm" onclick="delRow(\'master_kegiatan\',\''+d.id+'\')">Hapus</button>'+
+          '</td>'+
+        '</tr>';
+      }).join('');
+    }
+
+    function clearMasterKegiatanForm(){
+      document.getElementById('fkg-id').value='';
+      document.getElementById('fkg-nama').value='';
+      document.getElementById('fkg-desc').value='';
+      document.getElementById('m-kegiatan-title').textContent='Tambah Kegiatan';
+    }
+
+    function editMasterKegiatan(id){
+      var d = dbGet('master_kegiatan').find(function(x){return x.id===id;});
+      if(!d) return;
+      document.getElementById('fkg-id').value=d.id;
+      document.getElementById('fkg-nama').value=d.nama;
+      document.getElementById('fkg-desc').value=d.desc||'';
+      document.getElementById('m-kegiatan-title').textContent='Edit Kegiatan';
+      openModal('m-kegiatan');
+    }
+
+    function saveMasterKegiatan(btn){
+      var id=document.getElementById('fkg-id').value;
+      var nama=document.getElementById('fkg-nama').value.trim();
+      var desc=document.getElementById('fkg-desc').value.trim();
+      if(!nama){toast('Nama kegiatan wajib diisi','error');return;}
+      dbSave('master_kegiatan',{id:id,nama:nama,desc:desc});
+      renderMasterKegiatan();
+      renderJadwal(); // Update options in the grid
+      renderKalender(); // Refresh kalender
+      toast('Kegiatan disimpan','success');
+      saveSuccessBtn(btn, 'm-kegiatan');
+    }
+
+
+
+    function renderKhusus(){
+      var data = dbGet('khusus'), pak = dbGet('pakaian');
+      document.getElementById('tb-khusus').innerHTML = data.map(function(d){
+        var p = pak.find(function(x){return x.id===d.pakaianId;});
+        return '<tr>'+
+          '<td>'+d.tgl+'</td>'+
+          '<td>'+(d.bln ? BULAN[d.bln-1] : '<span style="color:var(--primary); font-weight:600">Semua Bulan</span>')+'</td>'+
+          '<td>'+((d.hari !== undefined && d.hari !== '') ? HARI[+d.hari] : '<span style="color:var(--muted)">Abaikan</span>')+'</td>'+
+          '<td>'+(p?p.nama:'–')+'</td>'+
+          '<td>'+d.ket+'</td>'+
+          '<td><div style="display:flex;gap:6px">'+
+            '<button class="btn btn-outline btn-sm" onclick="editKhusus(\''+d.id+'\')">Edit</button>'+
+            '<button class="btn btn-danger btn-sm" onclick="delRow(\'khusus\',\''+d.id+'\')">Hapus</button>'+
+          '</div></td>'+
+        '</tr>';
+      }).join('');
+    }
+
+    // ================================================
+    // CRUD ACTIONS
+    // ================================================
+    function cariTable(tbodyId, keyword) {
+      var tbody = document.getElementById(tbodyId);
+      if(!tbody) return;
+      var trs = tbody.getElementsByTagName('tr');
+      var kw = keyword.toLowerCase();
+      for(var i=0; i<trs.length; i++) {
+         var td = trs[i].getElementsByTagName('td');
+         var match = false;
+         for(var j=0; j<td.length; j++) {
+            if(td[j].textContent.toLowerCase().indexOf(kw) > -1) {
+               match = true;
+               break;
+            }
+         }
+         trs[i].style.display = match ? '' : 'none';
+      }
+    }
+    function delRow(t,id){
+      if(!confirm('Hapus data ini?')) return;
+      dbDel(t,id);
+      if(t==='guru') renderGuru();
+      if(t==='pakaian') renderPakaian();
+      if(t==='khusus') renderKhusus();
+      if(t==='master_kegiatan') { renderMasterKegiatan(); renderJadwal(); }
+      toast('Data dihapus','success');
+    }
+
+    function clearGuruForm(){
+      document.getElementById('fg-id').value='';
+      document.getElementById('fg-nip').value='';
+      document.getElementById('fg-nama').value='';
+      document.getElementById('fg-user').value='';
+      document.getElementById('fg-pass').value='';
+      document.getElementById('m-guru-title').textContent='Tambah Guru';
+    }
+    function editGuru(id){
+      var d = dbGet('guru').find(function(x){return x.id===id;});
+      if(!d) return;
+      document.getElementById('fg-id').value=d.id;
+      document.getElementById('fg-nip').value=d.nip;
+      document.getElementById('fg-nama').value=d.nama;
+      document.getElementById('fg-user').value=d.username;
+      document.getElementById('m-guru-title').textContent='Edit Guru';
+      openModal('m-guru');
+    }
+    function saveGuru(btn){
+      var id=document.getElementById('fg-id').value;
+      var nip=document.getElementById('fg-nip').value.trim();
+      var nama=document.getElementById('fg-nama').value.trim();
+      var user=document.getElementById('fg-user').value.trim();
+      if(!nama){toast('Nama wajib diisi','error');return;}
+      dbSave('guru',{id:id,nip:nip,nama:nama,username:user,status:1});
+      renderGuru();
+      toast('Data guru disimpan','success');
+      saveSuccessBtn(btn, 'm-guru');
+    }
+
+    function clearPakaianForm(){
+      document.getElementById('fp-id').value='';
+      document.getElementById('fp-nama').value='';
+      document.getElementById('fp-warna').value='#2563eb';
+      document.getElementById('fp-desc').value='';
+      document.getElementById('fp-foto').value='';
+      document.getElementById('fp-foto-b64').value='';
+      document.getElementById('fp-preview').style.display='none';
+      
+      document.getElementById('m-pakaian-title').textContent='Tambah Pakaian';
+    }
+
+
+    function previewFoto(input) {
+      if(input.files && input.files[0]) {
+        var file = input.files[0];
+        
+        // Cek ukuran file asli sebelum kompresi (opsional, batas aman 5MB)
+        if(file.size > 5 * 1024 * 1024) {
+          toast('Ukuran file terlalu besar! Mencoba mengkompres...','warning');
+        }
+
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var img = new Image();
+          img.onload = function() {
+            // Gunakan canvas untuk kompresi dan resize
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+            
+            // Set ukuran maksimal gambar (misal lebar/tinggi max 800px)
+            var MAX_WIDTH = 800;
+            var MAX_HEIGHT = 800;
+            var width = img.width;
+            var height = img.height;
+
+            if (width > height) {
+              if (width > MAX_WIDTH) {
+                height *= MAX_WIDTH / width;
+                width = MAX_WIDTH;
+              }
+            } else {
+              if (height > MAX_HEIGHT) {
+                width *= MAX_HEIGHT / height;
+                height = MAX_HEIGHT;
+              }
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // Kompres ke JPEG dengan kualitas 70% (0.7)
+            var dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+            
+            var prev = document.getElementById('fp-preview');
+            prev.style.backgroundImage = 'url(' + dataUrl + ')';
+            prev.style.display = 'block';
+            document.getElementById('fp-foto-b64').value = dataUrl;
+          }
+          img.src = e.target.result;
+        }
+        reader.readAsDataURL(file);
+      }
+    }
+
+    async function savePakaian(btn){
+      var id = document.getElementById('fp-id').value;
+      var b64 = document.getElementById('fp-foto-b64').value || '';
+      var nama = document.getElementById('fp-nama').value;
+      
+      if(!nama) return toast('Nama pakaian wajib diisi!','error');
+
+      if(b64.startsWith('data:image') && APPS_SCRIPT_URL) {
+        var oriText = btn.innerHTML;
+        btn.innerHTML = '<span class="ms" style="animation:spin 1s linear infinite">refresh</span> Mengunggah...';
+        btn.disabled = true;
+        try {
+          var res = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+              action: 'upload_image',
+              filename: 'pakaian_' + Date.now() + '.jpg',
+              base64: b64
+            }),
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+          });
+          var json = await res.json();
+          if(json.status === 'success' && json.url) {
+            b64 = json.url; // Gunakan URL Drive
+            document.getElementById('fp-foto-b64').value = b64;
+          } else {
+            toast('Gagal mengunggah foto', 'error');
+          }
+        } catch(e) {
+          console.error(e);
+          toast('Error koneksi saat mengunggah foto', 'error');
+        }
+        btn.innerHTML = oriText;
+        btn.disabled = false;
+      }
+      
+      var data = {
+        id: id || null,
+        nama: nama,
+        warna: document.getElementById('fp-warna').value,
+        desc: document.getElementById('fp-desc').value,
+        foto: b64,
+        status: 1
+      };
+      dbSave('pakaian', data);
+      renderPakaian();
+      renderDash();
+      toast('Tersimpan!','success');
+      saveSuccessBtn(btn, 'm-pakaian');
+    }
+
+    function editPakaian(id){
+      var p = dbGet('pakaian').find(function(x){ return x.id===id; });
+      if(p){
+        document.getElementById('fp-id').value=p.id;
+        document.getElementById('fp-nama').value=p.nama;
+        document.getElementById('fp-warna').value=p.warna;
+        document.getElementById('fp-desc').value=p.desc||'';
+        document.getElementById('fp-foto').value='';
+        document.getElementById('fp-foto-b64').value=p.foto||'';
+        
+        var prev = document.getElementById('fp-preview');
+        if(p.foto) {
+           prev.style.backgroundImage = 'url(' + p.foto + ')';
+           prev.style.display = 'block';
+        } else {
+           prev.style.display = 'none';
+        }
+
+
+        document.getElementById('m-pakaian-title').textContent='Edit Pakaian';
+        openModal('m-pakaian');
+      }
+    }
+
+    function clearKhususForm(){
+      document.getElementById('m-khusus-title').textContent = 'Tambah Hari Khusus';
+      document.getElementById('fk-id').value = '';
+      document.getElementById('fk-tgl').value = '';
+      document.getElementById('fk-bln').value = '';
+      document.getElementById('fk-hari').value = '';
+      document.getElementById('fk-ket').value = '';
+      
+      var pak = dbGet('pakaian');
+      var opts = pak.map(function(p){ return '<option value="'+p.id+'">'+p.nama+'</option>'; }).join('');
+      document.getElementById('fk-pak').innerHTML = opts;
+    }
+
+    function editKhusus(id){
+      var d = dbGet('khusus').find(function(x){return x.id===id;});
+      if(!d) return;
+      
+      document.getElementById('m-khusus-title').textContent = 'Edit Hari Khusus';
+      document.getElementById('fk-id').value = d.id;
+      document.getElementById('fk-tgl').value = d.tgl;
+      document.getElementById('fk-bln').value = d.bln || '';
+      document.getElementById('fk-hari').value = (d.hari !== undefined && d.hari !== '') ? d.hari : '';
+      document.getElementById('fk-ket').value = d.ket || '';
+      
+      var pak = dbGet('pakaian');
+      var opts = pak.map(function(p){ return '<option value="'+p.id+'" '+(p.id===d.pakaianId?'selected':'')+'>'+p.nama+'</option>'; }).join('');
+      document.getElementById('fk-pak').innerHTML = opts;
+      
+      openModal('m-khusus');
+    }
+
+    function saveKhusus(btn){
+      var id = document.getElementById('fk-id').value;
+      var tglStr = document.getElementById('fk-tgl').value.trim();
+      var blnStr = document.getElementById('fk-bln').value.trim(); 
+      var hariStr = document.getElementById('fk-hari').value.trim();
+      var pakId = document.getElementById('fk-pak').value;
+      var ket = document.getElementById('fk-ket').value.trim();
+      
+      if(!tglStr) return toast('Peringatan: Tanggal wajib diisi!','error');
+      var tgl = parseInt(tglStr);
+      if(isNaN(tgl) || tgl<1 || tgl>31) return toast('Peringatan: Tanggal tidak valid (harus 1-31)','error');
+      
+      var bln = '';
+      if(blnStr !== '') {
+         bln = parseInt(blnStr);
+         if(isNaN(bln) || bln<1 || bln>12) return toast('Peringatan: Pilihan bulan tidak valid','error');
+      }
+      var hari = hariStr !== '' ? parseInt(hariStr) : '';
+      
+      if(!ket) return toast('Peringatan: Keterangan / Nama Acara wajib diisi!','error');
+      
+      var khusus = dbGet('khusus');
+      if(id) {
+         var idx = khusus.findIndex(function(x){return x.id===id;});
+         if(idx>-1) khusus[idx] = {id:id, tgl:tgl, bln:bln, hari:hari, pakaianId:pakId, ket:ket};
+      } else {
+         khusus.push({id:'KH_'+Date.now(), tgl:tgl, bln:bln, hari:hari, pakaianId:pakId, ket:ket});
+      }
+      dbSet('khusus', khusus);
+      renderKhusus();
+      renderKalender();
+      toast('Hari Khusus disimpan','success');
+      saveSuccessBtn(btn, 'm-khusus');
+    }
+
+    function saveJadwal(isSilent){
+      var selsPak = document.querySelectorAll('#sched-grid .sel-pak');
+      var selsKeg = document.querySelectorAll('#sched-grid .sel-keg');
+      var jadwal = dbGet('jadwal'); // Ambil data lama agar properti lain tidak hilang
+      var kegiatan = dbGet('kegiatan');
+      
+      var newJadwal = {};
+      var newKegiatan = {};
+      
+      // Pertahankan flag
+      var chkSabtu = document.getElementById('chk-sabtu');
+      var chkMinggu = document.getElementById('chk-minggu');
+      var selSiklus = document.getElementById('sel-siklus');
+      
+      newJadwal.includeSabtu = chkSabtu ? chkSabtu.checked : false;
+      newJadwal.includeMinggu = chkMinggu ? chkMinggu.checked : false;
+      newJadwal.siklus = selSiklus ? parseInt(selSiklus.value) : 4;
+      newKegiatan.siklus = newJadwal.siklus;
+
+      for(var i=0;i<selsPak.length;i++){
+        var h=selsPak[i].getAttribute('data-h'), w=selsPak[i].getAttribute('data-w'), v=selsPak[i].value;
+        if(!newJadwal[h]) newJadwal[h]={};
+        if(v) newJadwal[h][w]=v;
+      }
+      
+      for(var i=0;i<selsKeg.length;i++){
+        var h=selsKeg[i].getAttribute('data-h'), w=selsKeg[i].getAttribute('data-w'), v=selsKeg[i].value;
+        if(!newKegiatan[h]) newKegiatan[h]={};
+        if(v) newKegiatan[h][w]=v;
+      }
+      
+      if (typeof activeJadwalBulan !== 'undefined' && activeJadwalBulan !== 'ALL') {
+         dbSet('jadwal_bln_' + activeJadwalBulan, newJadwal);
+         dbSet('kegiatan_bln_' + activeJadwalBulan, newKegiatan);
+         if(!isSilent) toast('Jadwal khusus bulan ' + BULAN[parseInt(activeJadwalBulan)-1] + ' disimpan','success');
+         // We do NOT want to trigger a full re-render here if isSilent is true, 
+         // because updatePreview / toggleHari might call it silently. 
+         // But if it's manual save, we can renderJadwal.
+         if(!isSilent) renderJadwal();
+      } else {
+         dbSet('jadwal', newJadwal);
+         dbSet('kegiatan', newKegiatan);
+         if(!isSilent) toast('Jadwal mingguan Default disimpan','success');
+      }
+    }
+
+    function toggleHari() {
+      saveJadwal(true); // Simpan otomatis secara diam-diam agar input tidak hilang
+      renderJadwal();   // Render ulang tabel
+    }
+
+    function updatePreview() {
+      saveJadwal(true); // Simpan secara diam-diam
+      renderKalender(); // Render ulang kalender di bawah
+    }
+
+    function updateBajuColor(sel) {
+      if(!sel) return;
+      var opt = sel.options[sel.selectedIndex];
+      var w = opt ? opt.getAttribute('data-warna') : null;
+      if (w) {
+         sel.style.backgroundColor = w;
+         var hex = w.replace('#','');
+         if(hex.length === 6) {
+           var r=parseInt(hex.substr(0,2),16), g=parseInt(hex.substr(2,2),16), b=parseInt(hex.substr(4,2),16);
+           var lum = (0.299*r + 0.587*g + 0.114*b)/255;
+           sel.style.color = lum > 0.55 ? '#000' : '#fff';
+         } else {
+           sel.style.color = '#fff';
+         }
+      } else {
+         sel.style.backgroundColor = '';
+         sel.style.color = '';
+      }
+    }
+
+    // ================================================
+    // LOGIKA KALENDER VISUAL
+    // ================================================
+    var calYear = new Date().getFullYear();
+    var calMonth = new Date().getMonth();
+
+    function navKalender(dir) {
+      calMonth += dir;
+      if (calMonth < 0) { calMonth = 11; calYear--; }
+      if (calMonth > 11) { calMonth = 0; calYear++; }
+      renderKalender();
+    }
+    
+    function goToToday() {
+      var d = new Date();
+      calYear = d.getFullYear();
+      calMonth = d.getMonth();
+      renderKalender();
+    }
+
+    function renderKalender() {
+      var titles = document.querySelectorAll('.cal-title');
+      for(var i=0; i<titles.length; i++) titles[i].textContent = BULAN[calMonth] + ' ' + calYear;
+      
+      var now = new Date();
+      var todayLabel = document.getElementById('cal-today-label');
+      if(todayLabel) {
+        todayLabel.textContent = '(' + HARI[now.getDay()] + ', ' + now.getDate() + ' ' + BULAN[now.getMonth()] + ' ' + now.getFullYear() + ')';
+      }
+      
+      var html = '';
+      
+      var hariKerja = [
+        {n:'Senin', c:'#ef4444'},
+        {n:'Selasa', c:'#f97316'},
+        {n:'Rabu', c:'#eab308'},
+        {n:'Kamis', c:'#22c55e'},
+        {n:'Jumat', c:'#0ea5e9'},
+        {n:'Sabtu', c:'#6366f1'},
+        {n:'Minggu', c:'#ec4899'}
+      ];
+      hariKerja.forEach(function(h) {
+        html += '<div class="cal-day-head" style="background-color:' + h.c + '">' + h.n + '</div>';
+      });
+
+      var firstDay = new Date(calYear, calMonth, 1).getDay(); // 0=Minggu, 1=Senin
+      var daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+      var daysInPrevMonth = new Date(calYear, calMonth, 0).getDate();
+      
+      var offset = (firstDay === 0) ? 6 : firstDay - 1;
+      var todayDate = new Date();
+
+      function renderCell(d, monthOffset, isMuted) {
+        var dateObj = new Date(calYear, calMonth + monthOffset, d);
+        var info = todayUniform(dateObj); 
+        
+        var isToday = (d === todayDate.getDate() && dateObj.getMonth() === todayDate.getMonth() && dateObj.getFullYear() === todayDate.getFullYear());
+        var todayClass = isToday ? ' today' : '';
+        
+        var dateHtml = d;
+        var dClass = 'cal-date';
+        
+        if (d === 1) {
+          dateHtml = '<img src="file:///C:/Users/LENOVO/.gemini/antigravity/brain/81d148a4-1591-40e2-ad30-913c131c9d92/.user_uploaded/media__1785422177482.png" style="width:28px; height:28px; vertical-align:middle; object-fit:contain" alt="1">';
+          dClass += ' cal-date-today'; // Hilangkan background putih untuk tumpeng
+        } else if (isToday) {
+          dClass += ' cal-date-today';
+        }
+        
+        var isLibur = (info.type === 'libur');
+        var cellStyle = isLibur ? 'background:rgba(239,68,68,0.05);' : '';
+        if (isMuted) cellStyle += 'opacity:0.15; filter:grayscale(30%); pointer-events:none;';
+        
+        var dateColor = (isLibur && !isToday) ? 'color:var(--danger)' : '';
+        
+        var thumbHtml = '';
+        if (isLibur) {
+          thumbHtml = '<div style="display:flex; flex:1; align-items:center; justify-content:center; color:var(--danger); font-weight:800; font-size:16px; text-transform:uppercase; letter-spacing:1px; opacity:0.7">Libur</div>';
+        } else if (info.pakaian && info.pakaian.nama !== 'Belum diatur' && info.pakaian.nama !== 'Libur') {
+          var bg = info.pakaian.foto ? 'url('+info.pakaian.foto+')' : info.pakaian.warna;
+          var name = info.pakaian.nama;
+          if (info.type === 'khusus') name = '🌟 ' + name;
+          var kegHtml = info.kegiatan ? '<div style="font-size:9px; font-weight:normal; margin-top:2px; opacity:0.9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#fff">' + info.kegiatan + '</div>' : '';
+          thumbHtml = '<div class="cal-thumb" style="background:'+bg+' center/cover"><div class="cal-thumb-name"><div style="font-weight:700">' + name + '</div>' + kegHtml + '</div></div>';
+        }
+
+        var isClickable = (typeof currentAkun !== 'undefined' && currentAkun && currentAkun.role === 'AdminSekolah') ? ' cursor:pointer;' : '';
+        var onclickStr = (isClickable !== '') ? ' onclick="openQuickEdit('+calYear+','+calMonth+','+d+')"' : '';
+
+        return '<div class="cal-cell' + todayClass + '" style="'+cellStyle+isClickable+'"'+onclickStr+'>'+
+                  '<div class="'+dClass+'" style="'+dateColor+'">' + dateHtml + '</div>'+
+                  thumbHtml +
+               '</div>';
+      }
+
+      // Kotak tanggal dari bulan sebelumnya (Muted)
+      for (var i = 0; i < offset; i++) {
+        var prevD = daysInPrevMonth - offset + i + 1;
+        html += renderCell(prevD, -1, true);
+      }
+
+      // Kotak tanggal bulan ini (Normal)
+      for (var d = 1; d <= daysInMonth; d++) {
+        html += renderCell(d, 0, false);
+      }
+      
+      // Kotak tanggal dari bulan berikutnya (Muted)
+      var totalCells = offset + daysInMonth;
+      var remainingCells = (7 - (totalCells % 7)) % 7;
+      // Jika butuh baris genap, bisa disesuaikan, tapi mengisi sisa kotak di baris terakhir sudah cukup
+      for (var i = 1; i <= remainingCells; i++) {
+        html += renderCell(i, 1, true);
+      }
+
+      var grids = document.querySelectorAll('.cal-grid');
+      for(var i=0; i<grids.length; i++) grids[i].innerHTML = html;
+      
+      // Render Legend Keterangan
+      var notesHtml = '';
+      var activeNotes = [];
+      
+      for(var d=1; d<=daysInMonth; d++) {
+         var dateObj = new Date(calYear, calMonth, d);
+         var info = todayUniform(dateObj);
+         
+         // Jika ada event khusus atau libur (yang bukan sekadar libur akhir pekan biasa)
+         if (info.type === 'khusus' || (info.type === 'libur' && info.kegiatan)) {
+            activeNotes.push({
+               tgl: d,
+               dayName: HARI[dateObj.getDay()],
+               monthName: BULAN[calMonth],
+               ketText: info.kegiatan || (info.type === 'libur' ? 'Libur Nasional' : 'Perubahan Seragam'),
+               isLibur: info.type === 'libur'
+            });
+         }
+      }
+      
+      if (activeNotes.length > 0) {
+         notesHtml += '<div style="padding:16px; background:var(--surface); border-radius:8px; border:1px solid var(--border)">';
+         notesHtml += '<h4 style="margin-top:0; margin-bottom:8px; font-size:14px; color:var(--text)"><span class="ms" style="font-size:18px; vertical-align:middle; color:var(--primary); margin-right:4px">event_note</span> Keterangan Bulan Ini:</h4>';
+         notesHtml += '<ul style="margin:0; padding-left:24px; font-size:13.5px; color:var(--muted)">';
+         activeNotes.forEach(function(n) {
+            var textStyle = n.isLibur ? 'color:var(--danger); font-weight:600' : 'color:var(--text)';
+            notesHtml += '<li style="margin-bottom:6px"><strong>' + n.dayName + ', ' + n.tgl + ' ' + n.monthName + ':</strong> <span style="' + textStyle + '">' + n.ketText + '</span></li>';
+         });
+         notesHtml += '</ul></div>';
+      }
+      
+      var legend = document.getElementById('cal-legend');
+      if (legend) legend.innerHTML = notesHtml;
+    }
+
+    // ================================================
+    // LOGIKA SHARE & PUBLIK VIEW
+    // ================================================
+    function getBaseUrl() {
+      // Lebih aman untuk local file maupun hosting
+      return window.location.href.split('?')[0];
+    }
+
+    function copyPublicLink() {
+      var url = getBaseUrl() + '?sekolah=' + encodeURIComponent(currentSekolahId);
+      navigator.clipboard.writeText(url).then(function() {
+        toast('Link berhasil disalin!');
+      });
+    }
+
+    function sharePublicLink() {
+      var url = getBaseUrl() + '?sekolah=' + encodeURIComponent(currentSekolahId);
+      if (navigator.share) {
+        navigator.share({
+          title: 'Jadwal Seragam ' + currentSekolahId.replace(/_/g, ' '),
+          text: 'Lihat jadwal seragam hari ini!',
+          url: url
+        }).catch(function(e) { console.log('Share error:', e); });
+      } else {
+        copyPublicLink();
+      }
+    }
+
+    function shareWA() {
+      var url = getBaseUrl() + '?sekolah=' + encodeURIComponent(currentSekolahId);
+      var text = "Halo! Silakan cek Jadwal Seragam Pakaian Dinas Guru untuk " + currentSekolahId.replace(/_/g, ' ') + " hari ini melalui link berikut:\n\n" + url;
+      window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank');
+    }
+
+    function renderPublikView() {
+      document.getElementById('pub-sekolah-name').textContent = currentSekolahId.replace(/_/g, ' ');
+      
+      // Deteksi jika data kosong (biasanya karena buka di Incognito / Browser lain)
+      if (Object.keys(dbGet('jadwal')).length === 0) {
+        var allGuru = dbGet('guru');
+        var schools = allGuru.map(function(g){ return g.sekolahId; }).join(', ');
+        if(!schools) schools = 'Belum ada akun guru yang tersimpan di browser ini.';
+        
+        alert("⚠️ DATA KOSONG DI TAMPILAN PUBLIK!\n\nBrowser ini mencoba mencari jadwal untuk ID Sekolah: [" + currentSekolahId + "]\nNamun, ID Sekolah yang tersimpan di memori browser ini adalah: [" + schools + "]\n\nPenyebab kemungkinan:\n1. Anda salah ketik di URL (misal ada spasi berlebih).\n2. Anda membuka link ini di Tab Incognito atau browser yang berbeda (seperti HP), sehingga memori lokalnya (localStorage) kosong.\n\nSolusi sementara: Buka link ini di Tab biasa pada browser yang sama dengan Admin.");
+      }
+
+      var now = new Date();
+      var dateLabel = document.getElementById('pub-today-date');
+      if (dateLabel) {
+        dateLabel.textContent = HARI[now.getDay()] + ', ' + now.getDate() + ' ' + BULAN[now.getMonth()] + ' ' + now.getFullYear();
+      }
+
+      var info = todayUniform(now);
+      var thumb = document.getElementById('pub-today-thumb');
+      var glowWrap = document.getElementById('pub-today-glow-wrap');
+      var nameEl = document.getElementById('pub-today-name');
+      var descEl = document.getElementById('pub-today-desc');
+      
+      if(glowWrap) glowWrap.className = 'glow-' + now.getDay();
+      
+      if (info.pakaian && info.pakaian.nama !== 'Belum diatur' && info.pakaian.nama !== 'Libur') {
+        thumb.style.background = info.pakaian.foto ? 'url('+info.pakaian.foto+') center/cover' : info.pakaian.warna;
+        nameEl.textContent = info.pakaian.nama;
+        var activityText = info.kegiatan ? '<div style="font-size:16px; font-weight:700; color:var(--primary); margin-top:4px;">📌 ' + info.kegiatan + '</div>' : '';
+        descEl.innerHTML = activityText + '<div style="margin-top:6px; opacity:0.9">' + (info.pakaian.desc || 'Seragam sesuai jadwal') + '</div>';
+        if(info.type === 'khusus') nameEl.textContent = '🌟 ' + nameEl.textContent;
+      } else {
+        thumb.style.background = '#f87171';
+        nameEl.textContent = 'Libur / Bebas';
+        descEl.textContent = 'Tidak ada jadwal seragam hari ini';
+      }
+    }
+
+
+
+    // ================================================
+    // LOGIKA PROFIL & GANTI PASSWORD
+    // ================================================
+    function openProfil() {
+      if(!currentAkun) {
+        toast('Sesi tidak ditemukan. Harap login ulang.', 'error');
+        return;
+      }
+      document.getElementById('fpr-sekolah').value = currentSekolahId !== 'ALL' ? currentSekolahId : '';
+      document.getElementById('fpr-nama').value = currentAkun.nama;
+      document.getElementById('fpr-pass').value = '';
+      document.getElementById('fpr-pass').type = 'password';
+      document.getElementById('fpr-eye').textContent = 'visibility_off';
+      openModal('m-profil');
+    }
+
+    function toggleEye(inputId, eyeId) {
+      var inp = document.getElementById(inputId);
+      var eye = document.getElementById(eyeId);
+      if(inp.type === 'password') {
+        inp.type = 'text';
+        eye.textContent = 'visibility';
+      } else {
+        inp.type = 'password';
+        eye.textContent = 'visibility_off';
+      }
+    }
+
+    function saveProfil(btn) {
+      var pass = document.getElementById('fpr-pass').value.trim();
+      var sek = document.getElementById('fpr-sekolah').value.trim();
+      var namaBaru = document.getElementById('fpr-nama').value.trim();
+      var updated = false;
+
+      // Update data sekolah jika berubah dan migrasi data lokal
+      if(sek && sek !== currentSekolahId) {
+         var tables = ['pakaian', 'jadwal', 'khusus'];
+         var oldPrefix = (currentSekolahId && currentSekolahId !== 'ALL') ? currentSekolahId + '_' : 'DEFAULT_';
+         var newPrefix = sek + '_';
+         
+         tables.forEach(function(t) {
+           var oldData = store.get(PFX + oldPrefix + t);
+           if (oldData) {
+             store.set(PFX + newPrefix + t, oldData);
+             store.remove(PFX + oldPrefix + t);
+           }
+         });
+         
+         currentSekolahId = sek;
+         currentAkun.sekolahId = sek;
+         updated = true;
+      }
+      
+      // Update data diri guru (Nama & Password)
+      var allGuru = dbGet('guru');
+      var guruUpdated = false;
+      
+      for(var i=0; i<allGuru.length; i++){
+        if(allGuru[i].id === currentAkun.id) {
+          if(namaBaru && namaBaru !== currentAkun.nama) {
+            allGuru[i].nama = namaBaru;
+            currentAkun.nama = namaBaru;
+            guruUpdated = true;
+            updated = true;
+          }
+          if(pass) {
+            allGuru[i].password = pass;
+            currentAkun.password = pass;
+            guruUpdated = true;
+            updated = true;
+          }
+          break;
+        }
+      }
+      
+      if(guruUpdated) {
+        dbSet('guru', allGuru);
+        // Jika login sebagai Guru, perbarui nama di layar depan
+        if(currentUserRole === 'Guru') {
+           document.getElementById('guru-name').innerText = currentAkun.nama;
+        }
+      }
+      
+      if(updated) {
+        store.set('pdg_session', JSON.stringify(currentAkun)); // Perbarui sesi
+        toast('Profil berhasil diperbarui!', 'success');
+      } else {
+        toast('Tidak ada perubahan disimpan', 'info');
+      }
+      
+      saveSuccessBtn(btn, 'm-profil');
+    }
+
+    // ================================================
+    // MODAL HELPERS
+    // ================================================
+    function openModal(id){ document.getElementById(id).classList.add('open'); }
+    function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+    
+    function saveSuccessBtn(btn, modalId, callback) {
+      if(!btn) {
+         if(modalId) closeModal(modalId);
+         if(callback) callback();
+         return;
+      }
+      var oldHtml = btn.innerHTML;
+      var oldW = btn.style.width;
+      var compW = btn.offsetWidth;
+      if(compW > 0) btn.style.width = compW + 'px';
+      
+      btn.innerHTML = '<span class="ms" style="font-size:24px; vertical-align:middle">check</span>';
+      
+      setTimeout(function(){
+         if(modalId) closeModal(modalId);
+         btn.innerHTML = oldHtml;
+         btn.style.width = oldW;
+         if(callback) callback();
+      }, 600);
+    }
+
+    // ================================================
+    // LOGIKA TEMA (DARK/LIGHT MODE)
+    // ================================================
+    function toggleTheme() {
+      var html = document.documentElement;
+      var current = html.getAttribute('data-theme');
+      var newTheme = current === 'dark' ? 'light' : 'dark';
+      
+      if (!current) {
+        newTheme = 'dark'; // Default sekarang selalu light, maka toggle pertama kali ubah ke dark
+      }
+      
+      html.setAttribute('data-theme', newTheme);
+      store.set('pdg_theme', newTheme);
+      updateThemeIcons();
+    }
+
+    function updateThemeIcons() {
+      var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      var icon = isDark ? 'light_mode' : 'dark_mode';
+      var btnGuru = document.querySelector('#btn-theme-guru .ms');
+      if(btnGuru) btnGuru.textContent = icon;
+      var btnAdmin = document.querySelector('#btn-theme-admin .ms');
+      if(btnAdmin) btnAdmin.textContent = icon;
+    }
+
+    // ================================================
+    // TOAST
+    // ================================================
+    function toast(msg, type){
+      type = type||'success';
+      var icons = {success:'check_circle',error:'error',info:'info'};
+      var c = document.getElementById('toasts');
+      var el = document.createElement('div');
+      el.className='toast '+type;
+      el.innerHTML='<span class="ms">'+icons[type]+'</span><span>'+msg+'</span>';
+      c.appendChild(el);
+      setTimeout(function(){ el.style.animation='fadeOut .3s ease forwards'; setTimeout(function(){el.remove();},300); },3000);
+    }
+
+    // ================================================
+    // CETAK PDF 1 HARI / HALAMAN
+    // ================================================
+    async function downloadKalenderPDF() {
+      if (!window.jspdf || !window.html2canvas) {
+        toast('Sedang memuat modul pembuat PDF... Silakan coba lagi dalam beberapa detik.', 'info');
+        return;
+      }
+      
+      var loading = document.getElementById('pdf-loading');
+      var status = document.getElementById('pdf-status');
+      var renderZone = document.getElementById('pdf-render-zone');
+      
+      loading.style.display = 'flex';
+      
+      try {
+        var daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+        var { jsPDF } = window.jspdf;
+        var doc = new jsPDF('p', 'mm', 'a4'); // portrait, millimeters, A4 size (approx 210x297mm)
+        var pdfName = 'Kalender_Seragam_' + currentSekolahId + '_' + BULAN[calMonth] + '_' + calYear + '.pdf';
+        
+        var jadwal = dbGet('jadwal');
+        if(!jadwal) jadwal = { type: 'mingguan', siklus: 4, includeSabtu: true, includeMinggu: false };
+
+        for (var day = 1; day <= daysInMonth; day++) {
+          status.textContent = 'Memproses halaman ' + day + ' dari ' + daysInMonth + '...';
+          
+          var d = new Date(calYear, calMonth, day);
+          var info = todayUniform(d);
+          var hariStr = HARI[d.getDay()] + ', ' + day + ' ' + BULAN[calMonth] + ' ' + calYear;
+          
+          var bgVal = '#f1f5f9';
+          var imgHtml = '';
+          var nameHtml = 'Libur / Tidak Ada Jadwal';
+          var descHtml = 'Silakan sesuaikan dengan ketentuan sekolah.';
+          
+          if (info.pakaian && info.pakaian.nama !== 'Belum diatur' && info.pakaian.nama !== 'Libur') {
+             bgVal = info.pakaian.foto ? 'url('+info.pakaian.foto+')' : info.pakaian.warna;
+             nameHtml = info.type === 'khusus' ? '🌟 ' + info.pakaian.nama : info.pakaian.nama;
+             descHtml = info.pakaian.desc || 'Seragam Pakaian Dinas Guru';
+          }
+          
+          if (info.type === 'libur' || d.getDay() === 0 || (!jadwal.includeSabtu && d.getDay() === 6)) {
+             // Pastikan hari libur ter-override khusus untuk tampilan PDF jika bukan "Hari Kerja"
+             if(info.pakaian && info.pakaian.nama !== 'Belum diatur') {
+                // Hari ini libur akhir pekan tapi ada jadwal baju yang di-setup? Pakai bajunya
+             } else {
+                nameHtml = 'Hari Libur';
+                descHtml = 'Tanggal merah atau hari libur akhir pekan.';
+                bgVal = '#ef4444';
+             }
+          }
+          
+          renderZone.innerHTML = `
+            <div style="width:100%; height:100%; background:#fff; padding:80px; box-sizing:border-box; display:flex; flex-direction:column; align-items:center; text-align:center;">
+              <h1 style="font-size:36px; font-weight:900; margin-bottom:10px; color:#0f172a; text-transform:uppercase; letter-spacing:1px">${currentSekolahId.replace(/_/g, ' ')}</h1>
+              <p style="font-size:24px; color:#64748b; margin-bottom:80px; font-weight:600">Jadwal Pakaian Dinas Guru</p>
+              
+              <div style="width:400px; height:400px; border-radius:40px; margin:0 auto 40px; background:${bgVal} center/cover; box-shadow:0 30px 60px rgba(0,0,0,0.15); border:2px solid #e2e8f0;"></div>
+              
+              <h2 style="font-size:48px; font-weight:900; color:#2563eb; margin-bottom:20px; max-width:100%; word-break:break-word; line-height:1.2">${nameHtml}</h2>
+              <p style="font-size:20px; color:#64748b; margin-bottom:auto; line-height:1.5; max-width:500px">${descHtml}</p>
+              
+              <div style="margin-top:auto; padding-top:50px; border-top:3px dashed #e2e8f0; width:100%;">
+                 <h3 style="font-size:32px; font-weight:800; color:#0f172a">${hariStr}</h3>
+              </div>
+            </div>
+          `;
+          
+          // Allow DOM to update before taking canvas shot
+          await new Promise(r => setTimeout(r, 50)); 
+          
+          var canvas = await html2canvas(renderZone, { scale: 2, useCORS: true, logging: false });
+          var imgData = canvas.toDataURL('image/jpeg', 0.9);
+          
+          if (day > 1) doc.addPage();
+          doc.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+        }
+        
+        status.textContent = 'Menyimpan file PDF...';
+        await new Promise(r => setTimeout(r, 200));
+        doc.save(pdfName);
+        toast('Kalender PDF berhasil diunduh!');
+      } catch(err) {
+        console.error('PDF Generate Error:', err);
+        toast('Gagal membuat PDF: ' + err.message, 'error');
+      } finally {
+        loading.style.display = 'none';
+      }
+    }
+
+    async function downloadKalenderSatuLembar() {
+      if (!window.jspdf || !window.html2canvas) {
+        toast('Sedang memuat modul pembuat PDF...', 'info'); return;
+      }
+      var loading = document.getElementById('pdf-loading');
+      var status = document.getElementById('pdf-status');
+      loading.style.display = 'flex';
+      status.textContent = 'Memproses kalender 1 lembar...';
+      
+      try {
+        var renderZone = document.getElementById('pdf-render-zone');
+        var originalGrid = document.getElementById('cal-grid').innerHTML;
+        
+        // Buat struktur HTML dengan CSS inline agar html2canvas membacanya dengan sempurna
+        renderZone.innerHTML = `
+          <div style="width:794px; background:#f8fafc; padding:30px; box-sizing:border-box;">
+            <div style="text-align:center; margin-bottom:20px">
+               <h1 style="font-size:28px; font-weight:900; color:#0f172a; margin-bottom:4px; text-transform:uppercase">${currentSekolahId.replace(/_/g, ' ')}</h1>
+               <h2 style="font-size:18px; color:#64748b; font-weight:600">Jadwal Pakaian Dinas - ${BULAN[calMonth]} ${calYear}</h2>
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:6px; background:#fff; padding:16px; border-radius:16px; border:1px solid #e2e8f0; box-shadow:0 10px 30px rgba(0,0,0,0.05)">
+              ${originalGrid}
+            </div>
+          </div>
+        `;
+        
+        // Styling ulang elemen spesifik dengan CSS inline untuk html2canvas
+        var colors = ['#ef4444','#f97316','#eab308','#22c55e','#0ea5e9','#6366f1','#ec4899'];
+        renderZone.querySelectorAll('.cal-day-head').forEach((el, i) => {
+          el.style.backgroundColor = colors[i];
+          el.style.color = '#fff';
+          el.style.textAlign = 'center';
+          el.style.padding = '6px';
+          el.style.fontWeight = 'bold';
+          el.style.borderRadius = '6px';
+          el.style.fontSize = '12px';
+        });
+        
+        renderZone.querySelectorAll('.cal-cell').forEach(el => {
+          el.style.border = '2px solid #e2e8f0';
+          el.style.borderRadius = '6px';
+          el.style.minHeight = '90px';
+          el.style.padding = '6px';
+          el.style.display = 'flex';
+          el.style.flexDirection = 'column';
+          el.style.background = '#f8fafc';
+        });
+        
+        renderZone.querySelectorAll('.cal-date').forEach(el => {
+           el.style.textAlign = 'right';
+           el.style.fontWeight = 'bold';
+           el.style.fontSize = '14px';
+           el.style.marginBottom = '6px';
+           el.style.color = '#0f172a';
+        });
+        
+        renderZone.querySelectorAll('.cal-thumb').forEach(el => {
+           el.style.flex = '1';
+           el.style.borderRadius = '4px';
+           el.style.display = 'flex';
+           el.style.alignItems = 'flex-end';
+           el.style.padding = '4px';
+           el.style.border = '1px solid rgba(0,0,0,0.1)';
+        });
+        
+        renderZone.querySelectorAll('.cal-thumb-name').forEach(el => {
+           el.style.background = 'rgba(0,0,0,0.7)';
+           el.style.color = '#fff';
+           el.style.fontSize = '9px';
+           el.style.padding = '3px';
+           el.style.borderRadius = '3px';
+           el.style.width = '100%';
+           el.style.textAlign = 'center';
+           el.style.whiteSpace = 'normal';
+           el.style.lineHeight = '1.1';
+        });
+
+        // Hapus image lokal berawalan file:/// agar html2canvas tidak error "Tainted canvases" (CORS violation)
+        renderZone.querySelectorAll('img[src^="file://"]').forEach(img => {
+           var span = document.createElement('span');
+           span.textContent = '1'; 
+           span.style.fontWeight = 'bold';
+           span.style.fontSize = '16px';
+           span.style.color = '#0f172a';
+           img.parentNode.replaceChild(span, img);
+        });
+
+        await new Promise(r => setTimeout(r, 100)); // Tunggu DOM siap
+        
+        var canvas = await html2canvas(renderZone.children[0], { scale: 2, useCORS: true, logging: false });
+        var imgData = canvas.toDataURL('image/jpeg', 0.95);
+        
+        var { jsPDF } = window.jspdf;
+        var doc = new jsPDF('p', 'mm', 'a4'); 
+        
+        var imgProps = doc.getImageProperties(imgData);
+        var pdfWidth = doc.internal.pageSize.getWidth();
+        var pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        
+        doc.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+        doc.save('Kalender_1Lembar_' + currentSekolahId + '_' + BULAN[calMonth] + '_' + calYear + '.pdf');
+        
+        toast('Kalender 1 Lembar berhasil diunduh!');
+      } catch(err) {
+        console.error(err);
+        toast('Gagal: ' + err.message, 'error');
+      } finally {
+        loading.style.display = 'none';
+      }
+    }
+
+    // ================================================
+    // INIT — window.onload adalah cara paling andal di GAS
+    // ================================================
+    window.onload = async function(){
+      updateThemeIcons();
+
+      // Sinkronkan data dari Cloud sebelum melanjutkan!
+      await syncFromCloud();
+
+      try { seedData(); } catch(e){ console.warn('seedData err:',e); }
+
+      // 1. Cek URL parameter untuk Akses Publik (Paling Prioritas)
+      try {
+        var sid = null;
+        try { sid = new URLSearchParams(window.location.search).get('sekolah'); } catch(e) {}
+        if(!sid) {
+          var match = window.location.href.match(/[?&]sekolah=([^&#]+)/);
+          if(match) sid = decodeURIComponent(match[1]);
+        }
+
+        if(sid) {
+          currentSekolahId = sid.toUpperCase().replace(/[^A-Z0-9]+/g, '_');
+          showView('publik-view');
+          renderPublikView();
+          return; // Stop di sini jika akses publik
+        }
+      } catch(e) { console.warn('URL routing error:', e); }
+
+      // 2. Jika tidak ada parameter publik, cek Session Persistence Admin
+      var session = store.get('pdg_session');
+      if(session) {
+        try {
+          var akun = JSON.parse(session);
+          currentAkun = akun; // Set state global
+          
+          currentSekolahId = akun.sekolahId;
+          currentUserRole = akun.role || 'AdminSekolah';
+          
+          if(currentUserRole === 'AdminSekolah') {
+             var sbTitle = document.getElementById('sb-title');
+             var sbSubtitle = document.getElementById('sb-subtitle');
+             if(sbTitle) sbTitle.textContent = currentSekolahId.replace(/_/g, ' ');
+             if(sbSubtitle) sbSubtitle.textContent = currentAkun.nama;
+          }
+          
+          var mGuruD = document.getElementById('menu-guru-desktop');
+          var mGuruM = document.getElementById('menu-guru-mobile');
+          if (currentUserRole === 'AdminSekolah') {
+            if(mGuruD) mGuruD.style.display = 'none';
+            if(mGuruM) mGuruM.style.display = 'none';
+          } else {
+            if(mGuruD) mGuruD.style.display = 'flex';
+            if(mGuruM) mGuruM.style.display = 'flex';
+          }
+          
+          showView('admin-view');
+          
+          var lastTab = store.get('pdg_active_tab') || 'dash';
+          openTab(lastTab);
+          
+          // Bersihkan URL bar secara diam-diam agar parameter tidak nyangkut saat di-refresh
+          try {
+            if(window.history.replaceState && window.location.protocol !== 'file:') {
+               var cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+               window.history.replaceState({path: cleanUrl}, '', cleanUrl);
+            }
+          } catch(e) { console.warn('replaceState err:', e); }
+          
+          return;
+        } catch(e) { console.warn('Session parse error:', e); }
+      }
+
+      // Default: tampilkan halaman login
+      showView('login-view');
+    };
+  </script>
+</body>
+</html>
