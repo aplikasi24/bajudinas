@@ -596,6 +596,7 @@
         <div class="nav-link" onclick="openTab('pakaian',this)"><span class="ms">checkroom</span> Master Pakaian</div>
         <div class="nav-link" onclick="openTab('jadwal',this)"><span class="ms">calendar_month</span> Jadwal Mingguan</div>
         <div class="nav-link" onclick="openTab('khusus',this)"><span class="ms">celebration</span> Hari Khusus</div>
+        <div class="nav-link" id="menu-logs-desktop" style="display:none;" onclick="openTab('logs',this)"><span class="ms">history</span> Log Aktivitas</div>
       </div>
       <div class="nav-link danger" style="margin-top:auto" onclick="doLogout()"><span class="ms">logout</span> Logout</div>
     </nav>
@@ -607,6 +608,7 @@
       <div class="bn-item" onclick="openTab('pakaian',this)"><span class="ms">checkroom</span><span>Pakaian</span></div>
       <div class="bn-item" onclick="openTab('jadwal',this)"><span class="ms">calendar_month</span><span>Jadwal</span></div>
       <div class="bn-item" onclick="openTab('khusus',this)"><span class="ms">celebration</span><span>Khusus</span></div>
+      <div class="bn-item" id="menu-logs-mobile" style="display:none;" onclick="openTab('logs',this)"><span class="ms">history</span><span>Logs</span></div>
       <div class="bn-item" onclick="doLogout()"><span class="ms" style="color:var(--danger); font-size:24px">logout</span><span style="color:var(--danger)">Logout</span></div>
     </nav>
 
@@ -997,6 +999,31 @@
     <p style="font-size:13px; color:#cbd5e1; margin-top:8px;" id="cloud-sync-text">Mohon tunggu sebentar.</p>
   </div>
 
+  <!-- MODAL: LOGS -->
+  <section id="tab-logs" style="display:none; padding:16px; margin-bottom:80px; max-width:800px; margin-left:auto; margin-right:auto;">
+    <div class="header-action" style="margin-bottom:20px;">
+      <h2 style="font-weight:600">Riwayat Log Aktivitas</h2>
+      <button class="btn btn-outline" onclick="renderLogs()"><span class="ms">refresh</span> Refresh</button>
+    </div>
+    <div class="card" style="padding:0; overflow:hidden">
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Waktu</th>
+              <th>Sekolah ID</th>
+              <th>Username</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tb-logs">
+             <tr><td colspan="4" style="text-align:center">Memuat riwayat log...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
   <!-- =====================================================
        JAVASCRIPT
   ===================================================== -->
@@ -1017,7 +1044,7 @@
     
     // URL Web App Google Apps Script
     // MASUKKAN URL HASIL DEPLOY DI SINI
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyz6mbApBLAV1y1xVGY6twe08RYBQJ2iLJInIBSL8l38_GKj-gteyw4NzWF1BkrEKuB/exec"; 
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbydu7VklCVBU308fYE1nkYs1KL6BmBYOBNlHpDRoLPVTFP2iLfZK_a9la2AHll08LDE/exec"; 
 
     var currentSekolahId = 'DEFAULT'; // State penyimpan sekolah aktif
     var currentUserRole = '';
@@ -1095,6 +1122,17 @@
       syncSetCloud(getTableKey(t), d); // Sync ke backend di background
     }
     
+    // Fungsi khusus untuk mencatat log aktivitas
+    function catatLog(aksi) {
+      if(!APPS_SCRIPT_URL || !currentAkun) return;
+      var username = currentAkun.username + " (" + currentAkun.nama + ")";
+      fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'add_log', sekolahId: currentSekolahId, username: username, aksi: aksi }),
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+      }).catch(err => console.error("Gagal catat log", err));
+    }
+    
     function dbSave(t,item){
       var data = dbGet(t);
       if(item.id){
@@ -1105,6 +1143,32 @@
     }
     
     function dbDel(t,id){ dbSet(t, dbGet(t).filter(function(d){ return d.id!==id; })); }
+
+    function renderLogs() {
+      // Ambil log yang disinkronisasi terakhir (atau jika tidak ada ambil kosong)
+      var logs = dbGet('logs');
+      var tb = document.getElementById('tb-logs');
+      if(!tb) return;
+      
+      if(logs.length === 0) {
+        tb.innerHTML = '<tr><td colspan="4" style="text-align:center">Belum ada riwayat log.</td></tr>';
+        return;
+      }
+      
+      // Urutkan dari yang terbaru (asumsi log ditambahkan berurutan)
+      logs.reverse();
+      
+      var html = '';
+      for(var i=0; i<logs.length; i++) {
+         html += '<tr>' + 
+                 '<td>'+(logs[i].Waktu || '')+'</td>' + 
+                 '<td>'+(logs[i].Sekolah_ID || '')+'</td>' + 
+                 '<td>'+(logs[i].Username || '')+'</td>' + 
+                 '<td>'+(logs[i].Aksi || '')+'</td>' + 
+                 '</tr>';
+      }
+      tb.innerHTML = html;
+    }
 
 
     // ================================================
@@ -1377,6 +1441,7 @@
       if(tab==='pakaian') renderPakaian();
       if(tab==='jadwal') { renderMasterKegiatan(); renderJadwal(); }
       if(tab==='khusus')  renderKhusus();
+      if(tab==='logs')    renderLogs();
     }
 
     // ================================================
@@ -1409,12 +1474,19 @@
       // Batasi menu untuk Admin Sekolah
       var mGuruD = document.getElementById('menu-guru-desktop');
       var mGuruM = document.getElementById('menu-guru-mobile');
+      var mLogsD = document.getElementById('menu-logs-desktop');
+      var mLogsM = document.getElementById('menu-logs-mobile');
+      
       if (currentUserRole === 'AdminSekolah') {
         if(mGuruD) mGuruD.style.display = 'none';
         if(mGuruM) mGuruM.style.display = 'none';
+        if(mLogsD) mLogsD.style.display = 'none';
+        if(mLogsM) mLogsM.style.display = 'none';
       } else {
         if(mGuruD) mGuruD.style.display = 'flex';
         if(mGuruM) mGuruM.style.display = 'flex';
+        if(mLogsD) mLogsD.style.display = 'flex';
+        if(mLogsM) mLogsM.style.display = 'flex';
       }
 
       showView('admin-view');
@@ -1930,6 +2002,7 @@
       renderJadwal(); // Update options in the grid
       renderKalender(); // Refresh kalender
       toast('Kegiatan disimpan','success');
+      catatLog((id ? 'Mengedit' : 'Menambah') + ' Kegiatan: ' + nama);
       saveSuccessBtn(btn, 'm-kegiatan');
     }
 
@@ -1981,6 +2054,7 @@
       if(t==='khusus') renderKhusus();
       if(t==='master_kegiatan') { renderMasterKegiatan(); renderJadwal(); }
       toast('Data dihapus','success');
+      catatLog('Menghapus data dari: ' + t);
     }
 
     function clearGuruForm(){
@@ -2010,6 +2084,7 @@
       dbSave('guru',{id:id,nip:nip,nama:nama,username:user,status:1});
       renderGuru();
       toast('Data guru disimpan','success');
+      catatLog((id ? 'Mengedit' : 'Menambah') + ' Guru: ' + nama);
       saveSuccessBtn(btn, 'm-guru');
     }
 
@@ -2127,6 +2202,7 @@
       renderPakaian();
       renderDash();
       toast('Tersimpan!','success');
+      catatLog((id ? 'Mengedit' : 'Menambah') + ' Pakaian: ' + nama);
       saveSuccessBtn(btn, 'm-pakaian');
     }
 
@@ -2217,6 +2293,7 @@
       renderKhusus();
       renderKalender();
       toast('Hari Khusus disimpan','success');
+      catatLog((id ? 'Mengedit' : 'Menambah') + ' Hari Khusus: ' + ket);
       saveSuccessBtn(btn, 'm-khusus');
     }
 
@@ -2254,15 +2331,18 @@
       if (typeof activeJadwalBulan !== 'undefined' && activeJadwalBulan !== 'ALL') {
          dbSet('jadwal_bln_' + activeJadwalBulan, newJadwal);
          dbSet('kegiatan_bln_' + activeJadwalBulan, newKegiatan);
-         if(!isSilent) toast('Jadwal khusus bulan ' + BULAN[parseInt(activeJadwalBulan)-1] + ' disimpan','success');
-         // We do NOT want to trigger a full re-render here if isSilent is true, 
-         // because updatePreview / toggleHari might call it silently. 
-         // But if it's manual save, we can renderJadwal.
-         if(!isSilent) renderJadwal();
+         if(!isSilent) {
+            toast('Jadwal khusus bulan ' + BULAN[parseInt(activeJadwalBulan)-1] + ' disimpan','success');
+            catatLog('Menyimpan Jadwal khusus bulan ' + BULAN[parseInt(activeJadwalBulan)-1]);
+            renderJadwal();
+         }
       } else {
          dbSet('jadwal', newJadwal);
          dbSet('kegiatan', newKegiatan);
-         if(!isSilent) toast('Jadwal mingguan Default disimpan','success');
+         if(!isSilent) {
+            toast('Jadwal mingguan Default disimpan','success');
+            catatLog('Menyimpan Jadwal mingguan Default');
+         }
       }
     }
 
