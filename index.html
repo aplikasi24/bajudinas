@@ -2920,14 +2920,6 @@
          pubCard.style.borderColor = setObj.pub_frame_color;
       }
       
-      // Deteksi jika data kosong (biasanya karena buka di Incognito / Browser lain)
-      if (Object.keys(dbGet('jadwal')).length === 0) {
-        var allGuru = dbGet('guru');
-        var schools = allGuru.map(function(g){ return g.sekolahId; }).join(', ');
-        if(!schools) schools = 'Belum ada akun guru yang tersimpan di browser ini.';
-        
-        alert("âš ï¸ DATA KOSONG DI TAMPILAN PUBLIK!\n\nBrowser ini mencoba mencari jadwal untuk ID Sekolah: [" + currentSekolahId + "]\nNamun, ID Sekolah yang tersimpan di memori browser ini adalah: [" + schools + "]\n\nPenyebab kemungkinan:\n1. Anda salah ketik di URL (misal ada spasi berlebih).\n2. Anda membuka link ini di Tab Incognito atau browser yang berbeda (seperti HP), sehingga memori lokalnya (localStorage) kosong.\n\nSolusi sementara: Buka link ini di Tab biasa pada browser yang sama dengan Admin.");
-      }
 
       var now = new Date();
       var dateLabel = document.getElementById('pub-today-date');
