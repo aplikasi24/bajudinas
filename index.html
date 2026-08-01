@@ -464,8 +464,8 @@
 
       <div id="pub-today-card" style="background:linear-gradient(135deg, var(--surface), var(--glass-bg)); border:1px solid var(--border); border-radius:var(--r-md); padding:32px; margin-bottom:32px; box-shadow: 0 10px 30px rgba(0,0,0,0.04);">
          <div id="pub-today-glow-wrap" style="position:relative; width:320px; height:320px; margin:0 auto 32px; border-radius:24px; z-index:1; display:flex; align-items:center; justify-content:center;">
-           <div style="position:absolute; inset:-8px; border-radius:32px; background:conic-gradient(from 0deg, transparent 50%, var(--glow-color) 100%); animation: spinGlow 2.5s linear infinite; z-index:-1;"></div>
-           <div style="position:absolute; inset:-8px; border-radius:32px; background:var(--glow-color); filter:blur(20px); opacity:0.5; animation: pulseGlow 2.5s ease-in-out infinite; z-index:-2;"></div>
+           <div id="pub-anim-1" style="position:absolute; inset:-8px; border-radius:32px; background:conic-gradient(from 0deg, transparent 50%, var(--glow-color) 100%); animation: spinGlow 2.5s linear infinite; z-index:-1;"></div>
+           <div id="pub-anim-2" style="position:absolute; inset:-8px; border-radius:32px; background:var(--glow-color); filter:blur(20px); opacity:0.5; animation: pulseGlow 2.5s ease-in-out infinite; z-index:-2;"></div>
            <div id="pub-today-thumb" style="width:100%; height:100%; border-radius:24px; background-size:cover; background-position:center; background-color:var(--surface); z-index:1; border:6px solid var(--surface)"></div>
          </div>
          <h3 id="pub-today-name" style="font-size:24px; font-weight:800; color:var(--primary); margin-bottom:8px; letter-spacing:-0.5px">Memuat...</h3>
@@ -811,7 +811,10 @@
       <div id="tab-pengaturan" class="admin-tab">
         <div class="ph" style="flex-wrap:wrap"><div><h2>Pengaturan Publik</h2><p>Personalisasi tautan publik dan hari libur</p></div>
            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
-             <button class="btn btn-outline btn-sm" onclick="shareWA()" style="border-color:#25D366; color:#25D366"><span class="ms" style="font-size:18px">whatsapp</span> Bagikan ke WA</button>
+             <button class="btn btn-outline btn-sm" onclick="shareWA()" style="border-color:#25D366; color:#25D366">
+               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="#25D366"><path d="M12.031 0C5.393 0 0 5.393 0 12.031c0 2.122.553 4.195 1.6 6.015L.305 24l6.104-1.602a11.964 11.964 0 005.622 1.4c6.638 0 12.031-5.393 12.031-12.032S18.67 0 12.031 0zm0 21.84a9.973 9.973 0 01-5.111-1.39l-.367-.217-3.799.997.997-3.799-.217-.367a9.972 9.972 0 01-1.39-5.111C2.144 5.418 6.55 1.01 12.031 1.01c5.48 0 9.887 4.407 9.887 9.887s-4.407 9.887-9.887 9.887zm5.556-7.575c-.305-.152-1.805-.892-2.083-.993-.278-.101-.482-.152-.686.152-.204.305-.788.993-.966 1.196-.178.204-.356.229-.661.077-.305-.152-1.288-.475-2.453-1.514-.907-.808-1.519-1.808-1.697-2.113-.178-.305-.019-.47.133-.622.137-.137.305-.356.457-.534.152-.178.204-.305.305-.508.101-.204.051-.382-.025-.534-.077-.152-.686-1.654-.94-2.264-.247-.595-.499-.515-.686-.525-.178-.01-.382-.01-.586-.01-.204 0-.534.077-.813.382-.278.305-1.067 1.042-1.067 2.541s1.093 2.947 1.245 3.15c.152.204 2.148 3.282 5.203 4.598 2.062.888 2.825.965 3.864.812 1.094-.162 3.354-1.371 3.824-2.693.471-1.321.471-2.454.331-2.693-.14-.239-.521-.381-.826-.533z"/></svg>
+               Bagikan ke WA
+             </button>
              <button class="btn btn-outline btn-sm" onclick="copyPublicLink()"><span class="ms" style="font-size:18px">content_copy</span> Salin Tautan</button>
              <button class="btn btn-primary btn-sm" onclick="savePengaturan(this)"><span class="ms" style="font-size:18px">save</span> Simpan</button>
            </div>
@@ -1128,7 +1131,7 @@
     
     // URL Web App Google Apps Script
     // MASUKKAN URL HASIL DEPLOY DI SINI
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx6WQ5lcGOJHC-UNwKKjXJsADJBPJQW_oabo7EPFPlduJIF42o2CpSuzUWxxiee4y1d/exec"; 
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbydu7VklCVBU308fYE1nkYs1KL6BmBYOBNlHpDRoLPVTFP2iLfZK_a9la2AHll08LDE/exec"; 
 
     var currentSekolahId = 'DEFAULT'; // State penyimpan sekolah aktif
     var currentUserRole = '';
@@ -2880,11 +2883,14 @@
       // Apply Frame Anim
       var glowWrap = document.getElementById('pub-today-glow-wrap');
       var pubCard = document.getElementById('pub-today-card');
+      var anim1 = document.getElementById('pub-anim-1');
+      var anim2 = document.getElementById('pub-anim-2');
       if(setObj.pub_anim !== 'true') {
-         glowWrap.style.animation = 'none';
-         glowWrap.style.boxShadow = 'none';
+         if(anim1) anim1.style.display = 'none';
+         if(anim2) anim2.style.display = 'none';
       } else {
-         glowWrap.style.animation = 'spinGlow 4s linear infinite';
+         if(anim1) anim1.style.display = 'block';
+         if(anim2) anim2.style.display = 'block';
       }
       
       // Apply Frame Color
@@ -2919,13 +2925,7 @@
       }
       
       if (info.pakaian && info.pakaian.nama !== 'Belum diatur' && info.pakaian.nama !== 'Libur') {
-         var bgVal = info.pakaian.warna || '#ccc';
-         thumb.style.backgroundColor = bgVal;
-         if(info.pakaian.foto && isValidFoto(info.pakaian.foto)) {
-            thumb.style.backgroundImage = 'url('+info.pakaian.foto+')';
-         } else {
-            thumb.style.backgroundImage = 'none';
-         }
+         thumb.style.background = info.pakaian.foto && isValidFoto(info.pakaian.foto) ? 'url('+info.pakaian.foto+') center/cover' : info.pakaian.warna;
          nameEl.textContent = info.pakaian.nama;
          var activityText = info.kegiatan ? '<div style="font-size:16px; font-weight:700; color:var(--primary); margin-top:4px;">ðŸ“Œ ' + info.kegiatan + '</div>' : '';
          descEl.innerHTML = activityText + '<div style="margin-top:6px; opacity:0.9">' + (info.pakaian.desc || 'Seragam sesuai jadwal') + '</div>';
@@ -2934,12 +2934,7 @@
          var liburImg = setObj.libur_image && isValidFoto(setObj.libur_image) ? setObj.libur_image : '';
          var liburTxt = setObj.libur_text || 'Hari ini sekolah libur';
          
-         thumb.style.backgroundColor = liburImg ? '#000' : '#f87171';
-         if (liburImg) {
-            thumb.style.backgroundImage = 'url('+liburImg+')';
-         } else {
-            thumb.style.backgroundImage = 'none';
-         }
+         thumb.style.background = liburImg ? 'url('+liburImg+') center/cover' : '#f87171';
          
          nameEl.textContent = 'Libur / Bebas';
          descEl.textContent = liburTxt;
