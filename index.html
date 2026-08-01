@@ -439,16 +439,43 @@
   <div id="pdf-render-zone"></div>
   
   <!-- Login Loading Overlay -->
-  <div id="login-loading-overlay" style="display:none; position:fixed; inset:0; background:rgba(255,255,255,0.9); z-index:99999; flex-direction:column; align-items:center; justify-content:center; backdrop-filter:blur(8px);">
-    <div style="position:relative; width:120px; height:120px; display:flex; align-items:center; justify-content:center;">
-      <svg viewBox="0 0 100 100" style="position:absolute; inset:0; width:100%; height:100%; transform:rotate(-90deg);">
-        <circle cx="50" cy="50" r="45" fill="none" stroke="#e2e8f0" stroke-width="8"></circle>
-        <circle id="login-progress-circle" cx="50" cy="50" r="45" fill="none" stroke="var(--primary)" stroke-width="8" stroke-dasharray="283" stroke-dashoffset="283" stroke-linecap="round" style="transition:stroke-dashoffset 0.1s linear;"></circle>
-      </svg>
-      <div id="login-progress-text" style="font-size:28px; font-weight:900; color:var(--primary); font-family:'Inter',sans-serif;">0%</div>
+  <div id="login-loading-overlay" style="display:none; position:fixed; inset:0; background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 50%,#0f172a 100%); z-index:99999; flex-direction:column; align-items:center; justify-content:center; backdrop-filter:blur(8px);">
+    
+    <!-- Ring Berputar -->
+    <div style="position:relative; width:140px; height:140px; margin-bottom:8px;">
+      <!-- Ring luar -->
+      <div style="position:absolute; inset:0; border-radius:50%; border:4px solid rgba(255,255,255,0.1); border-top-color:#60a5fa; border-right-color:#818cf8; animation:spinRing 1.2s linear infinite;"></div>
+      <!-- Ring tengah -->
+      <div style="position:absolute; inset:14px; border-radius:50%; border:4px solid rgba(255,255,255,0.08); border-bottom-color:#34d399; border-left-color:#f472b6; animation:spinRing 0.9s linear infinite reverse;"></div>
+      <!-- Ring dalam -->
+      <div style="position:absolute; inset:28px; border-radius:50%; border:3px solid rgba(255,255,255,0.05); border-top-color:#fbbf24; animation:spinRing 0.6s linear infinite;"></div>
+      <!-- Ikon tengah -->
+      <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center;">
+        <span class="ms" style="font-size:36px; color:#60a5fa; animation:pulseIcon 1.5s ease-in-out infinite;">checkroom</span>
+      </div>
     </div>
-    <h3 style="margin-top:24px; font-size:20px; font-weight:800; color:var(--text); letter-spacing:-0.5px;">Mempersiapkan Ruang Kerja</h3>
-    <p style="font-size:14px; color:var(--muted); margin-top:8px;">Harap tunggu sebentar...</p>
+
+    <!-- Bola Memantul -->
+    <div style="display:flex; align-items:flex-end; gap:10px; height:60px; margin-bottom:32px;">
+      <div style="width:14px; height:14px; border-radius:50%; background:#60a5fa; animation:bounceBall 0.8s ease-in-out infinite; animation-delay:0s; box-shadow:0 0 12px #60a5fa;"></div>
+      <div style="width:14px; height:14px; border-radius:50%; background:#818cf8; animation:bounceBall 0.8s ease-in-out infinite; animation-delay:0.15s; box-shadow:0 0 12px #818cf8;"></div>
+      <div style="width:14px; height:14px; border-radius:50%; background:#34d399; animation:bounceBall 0.8s ease-in-out infinite; animation-delay:0.3s; box-shadow:0 0 12px #34d399;"></div>
+      <div style="width:14px; height:14px; border-radius:50%; background:#f472b6; animation:bounceBall 0.8s ease-in-out infinite; animation-delay:0.45s; box-shadow:0 0 12px #f472b6;"></div>
+      <div style="width:14px; height:14px; border-radius:50%; background:#fbbf24; animation:bounceBall 0.8s ease-in-out infinite; animation-delay:0.6s; box-shadow:0 0 12px #fbbf24;"></div>
+    </div>
+
+    <h3 id="pub-loading-title" style="font-size:22px; font-weight:800; color:#f8fafc; letter-spacing:-0.5px; margin-bottom:8px; text-align:center; padding:0 24px;">Sedang memuat pakaian dinas hari ini...</h3>
+    <p style="font-size:14px; color:rgba(255,255,255,0.55); margin-top:0; text-align:center;">Harap tunggu sebentar...</p>
+
+    <style>
+      @keyframes spinRing { to { transform: rotate(360deg); } }
+      @keyframes pulseIcon { 0%,100% { opacity:0.7; transform:scale(0.9); } 50% { opacity:1; transform:scale(1.1); } }
+      @keyframes bounceBall {
+        0%,100% { transform: translateY(0px); }
+        40% { transform: translateY(-36px); }
+        60% { transform: translateY(-30px); }
+      }
+    </style>
   </div>
 
   <!-- Toast container -->
@@ -865,11 +892,18 @@
               <input type="color" id="set-pub-bg-color" value="#f8fafc" style="height:40px;width:100%;padding:4px">
             </div>
             <div class="input-wrap" id="wrap-pub-bg-image" style="display:none">
-              <label>Unggah Gambar Background</label>
-              <input type="file" id="set-pub-bg-file" accept="image/*" onchange="previewSetBg(this)">
-              <div id="set-pub-bg-preview" style="position:relative; width:100%; height:100px; margin-top:8px; background-size:cover; background-position:center; border-radius:8px; display:none; background-color:rgba(0,0,0,0.1)">
-                <button class="btn btn-danger btn-sm" style="position:absolute; top:4px; right:4px; padding:4px" onclick="removeSetBg()" title="Hapus Gambar"><span class="ms" style="font-size:16px">delete</span></button>
+              <label style="font-weight:600">Unggah Gambar Background <span style="font-size:11px; color:var(--muted); font-weight:400">(Maks 3 gambar)</span></label>
+              <input type="file" id="set-pub-bg-file" accept="image/*" onchange="handleGaleriUpload(this,'bg')" style="margin-bottom:8px">
+              <!-- Gambar Aktif -->
+              <div id="bg-active-wrap" style="display:none; margin-bottom:12px">
+                <div style="font-size:11px; font-weight:700; color:var(--success); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px">âœ… Sedang Digunakan</div>
+                <div style="position:relative; width:100%; height:110px; border-radius:8px; overflow:hidden; border:2px solid var(--success);">
+                  <div id="bg-active-img" style="width:100%; height:100%; background-size:cover; background-position:center;"></div>
+                  <button class="btn btn-danger btn-sm" style="position:absolute; top:4px; right:4px; padding:4px 8px;" onclick="hapusGaleriAktif('bg')" title="Hapus"><span class="ms" style="font-size:14px">delete</span></button>
+                </div>
               </div>
+              <!-- Daftar Galeri -->
+              <div id="bg-galeri-list" style="display:flex; flex-direction:column; gap:8px;"></div>
               <input type="hidden" id="set-pub-bg-b64">
             </div>
           </div>
@@ -883,11 +917,18 @@
               <input type="text" id="set-libur-text" placeholder="Contoh: Hari ini sekolah libur">
             </div>
             <div class="input-wrap">
-              <label>Gambar Hari Libur (Opsional)</label>
-              <input type="file" id="set-libur-file" accept="image/*" onchange="previewSetLibur(this)">
-              <div id="set-libur-preview" style="position:relative; width:100%; height:100px; margin-top:8px; background-size:cover; background-position:center; border-radius:8px; display:none; background-color:rgba(0,0,0,0.1)">
-                <button class="btn btn-danger btn-sm" style="position:absolute; top:4px; right:4px; padding:4px" onclick="removeSetLibur()" title="Hapus Gambar"><span class="ms" style="font-size:16px">delete</span></button>
+              <label style="font-weight:600">Gambar Hari Libur (Opsional) <span style="font-size:11px; color:var(--muted); font-weight:400">(Maks 3 gambar)</span></label>
+              <input type="file" id="set-libur-file" accept="image/*" onchange="handleGaleriUpload(this,'libur')" style="margin-bottom:8px">
+              <!-- Gambar Aktif -->
+              <div id="libur-active-wrap" style="display:none; margin-bottom:12px">
+                <div style="font-size:11px; font-weight:700; color:var(--success); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px">âœ… Sedang Digunakan</div>
+                <div style="position:relative; width:100%; height:110px; border-radius:8px; overflow:hidden; border:2px solid var(--success);">
+                  <div id="libur-active-img" style="width:100%; height:100%; background-size:cover; background-position:center;"></div>
+                  <button class="btn btn-danger btn-sm" style="position:absolute; top:4px; right:4px; padding:4px 8px;" onclick="hapusGaleriAktif('libur')" title="Hapus"><span class="ms" style="font-size:14px">delete</span></button>
+                </div>
               </div>
+              <!-- Daftar Galeri -->
+              <div id="libur-galeri-list" style="display:flex; flex-direction:column; gap:8px;"></div>
               <input type="hidden" id="set-libur-b64">
             </div>
           </div>
@@ -2676,19 +2717,8 @@
        document.getElementById('set-pub-bg-color').value = obj.pub_bg_color || '#f8fafc';
        document.getElementById('set-pub-bg-b64').value = obj.pub_bg_image || '';
        document.getElementById('set-libur-text').value = obj.libur_text || '';
-       document.getElementById('set-libur-b64').value = obj.libur_image || '';
-       
-       var pbPreview = document.getElementById('set-pub-bg-preview');
-       if(obj.pub_bg_image && isValidFoto(obj.pub_bg_image)) {
-          pbPreview.style.backgroundImage = 'url(\''+obj.pub_bg_image+'\')';
-          pbPreview.style.display = 'block';
-       }
-       
-       var libPreview = document.getElementById('set-libur-preview');
-       if(obj.libur_image && isValidFoto(obj.libur_image)) {
-          libPreview.style.backgroundImage = 'url(\''+obj.libur_image+'\')';
-          libPreview.style.display = 'block';
-       }
+       renderGaleri('bg', obj.pub_bg_image, JSON.parse(obj.pub_bg_gallery || '[]'));
+       renderGaleri('libur', obj.libur_image, JSON.parse(obj.libur_gallery || '[]'));
        
        togglePubBgType();
     }
@@ -2699,34 +2729,158 @@
        document.getElementById('wrap-pub-bg-image').style.display = type === 'image' ? 'block' : 'none';
     }
 
-    function previewSetBg(input) {
-       var prev = document.getElementById('set-pub-bg-preview');
-       var b64Inp = document.getElementById('set-pub-bg-b64');
-       processFileToDataUrl(input, prev, b64Inp);
+    // =========================================================
+    // GALERI GAMBAR (Background & Libur) â€” maks 3 gambar
+    // =========================================================
+
+    function renderGaleri(type, activeImg, gallery) {
+      var activeWrap = document.getElementById(type+'-active-wrap');
+      var activeImgEl = document.getElementById(type+'-active-img');
+      var listEl = document.getElementById(type+'-galeri-list');
+      var b64Input = document.getElementById(type === 'bg' ? 'set-pub-bg-b64' : 'set-libur-b64');
+
+      // Tampilkan gambar aktif
+      if (activeImg && isValidFoto(activeImg)) {
+        activeWrap.style.display = 'block';
+        activeImgEl.style.backgroundImage = 'url("' + activeImg + '")';
+        b64Input.value = activeImg;
+      } else {
+        activeWrap.style.display = 'none';
+        b64Input.value = '';
+      }
+
+      // Tampilkan daftar galeri
+      listEl.innerHTML = '';
+      if (!gallery || gallery.length === 0) return;
+
+      var header = document.createElement('div');
+      header.style.cssText = 'font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;';
+      header.textContent = 'Daftar Gambar Tersimpan (' + gallery.length + '/3)';
+      listEl.appendChild(header);
+
+      gallery.forEach(function(imgData, idx) {
+        var row = document.createElement('div');
+        row.style.cssText = 'display:flex; gap:8px; align-items:center; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:6px; overflow:hidden;';
+        row.innerHTML =
+          '<div style="flex-shrink:0; width:70px; height:52px; border-radius:6px; background:url(\"' + imgData + '\") center/cover no-repeat;"></div>' +
+          '<div style="flex:1; display:flex; flex-direction:column; gap:6px;">' +
+            '<button class="btn btn-outline btn-sm" style="color:var(--primary); border-color:var(--primary); padding:4px 10px; font-size:12px;" onclick="gunakanGaleri(\"'+type+'\",'+idx+')"><span class="ms" style="font-size:14px">check_circle</span> Gunakan</button>' +
+            '<button class="btn btn-danger btn-sm" style="padding:4px 10px; font-size:12px;" onclick="hapusGaleri(\"'+type+'\",'+idx+')"><span class="ms" style="font-size:14px">delete</span> Hapus</button>' +
+          '</div>';
+        listEl.appendChild(row);
+      });
     }
-    
-    function previewSetLibur(input) {
-       var prev = document.getElementById('set-libur-preview');
-       var b64Inp = document.getElementById('set-libur-b64');
-       processFileToDataUrl(input, prev, b64Inp);
+
+    function getGaleriState(type) {
+      var p = dbGet('pengaturan');
+      if(!Array.isArray(p)) p = [];
+      var obj = {};
+      p.forEach(function(item) { obj[item.Kunci] = item.Nilai; });
+      var activeKey = type === 'bg' ? 'pub_bg_image' : 'libur_image';
+      var galleryKey = type === 'bg' ? 'pub_bg_gallery' : 'libur_gallery';
+      return {
+        active: obj[activeKey] || '',
+        gallery: JSON.parse(obj[galleryKey] || '[]'),
+        activeKey: activeKey,
+        galleryKey: galleryKey,
+        obj: obj,
+        raw: p
+      };
     }
-    
-    function removeSetBg() {
-       document.getElementById('set-pub-bg-file').value = '';
-       document.getElementById('set-pub-bg-b64').value = '';
-       var prev = document.getElementById('set-pub-bg-preview');
-       prev.style.backgroundImage = 'none';
-       prev.style.display = 'none';
+
+    function setGaleriState(type, active, gallery) {
+      var p = dbGet('pengaturan');
+      if(!Array.isArray(p)) p = [];
+      var activeKey = type === 'bg' ? 'pub_bg_image' : 'libur_image';
+      var galleryKey = type === 'bg' ? 'pub_bg_gallery' : 'libur_gallery';
+
+      function upsert(key, val) {
+        var found = p.find(function(x){ return x.Kunci === key; });
+        if (found) { found.Nilai = val; } else { p.push({id:'SET_'+Date.now()+'_'+Math.random(), Kunci:key, Nilai:val}); }
+      }
+      upsert(activeKey, active);
+      upsert(galleryKey, JSON.stringify(gallery));
+      dbSet('pengaturan', p);
+      renderGaleri(type, active, gallery);
     }
-    
-    function removeSetLibur() {
-       document.getElementById('set-libur-file').value = '';
-       document.getElementById('set-libur-b64').value = '';
-       var prev = document.getElementById('set-libur-preview');
-       prev.style.backgroundImage = 'none';
-       prev.style.display = 'none';
+
+    function handleGaleriUpload(input, type) {
+      if (!input.files || !input.files[0]) return;
+      var file = input.files[0];
+      input.value = '';
+
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var img = new Image();
+        img.onload = function() {
+          var canvas = document.createElement('canvas');
+          var ctx = canvas.getContext('2d');
+          var MAX = 400; // Dikurangi agar Base64 cukup masuk ke sel Google Sheets (Limit 50K karakter)
+          var w = img.width, h = img.height;
+          if (w > h) { if (w > MAX) { h = h*MAX/w; w = MAX; } }
+          else        { if (h > MAX) { w = w*MAX/h; h = MAX; } }
+          canvas.width = w; canvas.height = h;
+          ctx.drawImage(img, 0, 0, w, h);
+          var dataUrl = canvas.toDataURL('image/jpeg', 0.5);
+
+          var state = getGaleriState(type);
+          var gallery = state.gallery.slice(); // copy
+          var active = state.active;
+
+          // Gambar aktif yang lama masuk ke gallery (jika belum ada)
+          if (active && isValidFoto(active) && gallery.indexOf(active) === -1) {
+            gallery.unshift(active); // taruh di awal daftar
+          }
+
+          // Batas maks 3 di gallery
+          if (gallery.length > 3) gallery = gallery.slice(0, 3);
+
+          // Upload baru jadi aktif
+          setGaleriState(type, dataUrl, gallery);
+          toast('Gambar berhasil diunggah dan digunakan!', 'success');
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
     }
-    
+
+    function gunakanGaleri(type, idx) {
+      var state = getGaleriState(type);
+      var gallery = state.gallery.slice();
+      var chosen = gallery[idx];
+      if (!chosen) return;
+
+      // Yang sedang aktif masuk gallery jika belum ada
+      if (state.active && isValidFoto(state.active) && gallery.indexOf(state.active) === -1) {
+        gallery.unshift(state.active);
+      }
+      // Hapus yang dipilih dari gallery
+      gallery.splice(gallery.indexOf(chosen), 1);
+      if (gallery.length > 3) gallery = gallery.slice(0, 3);
+
+      setGaleriState(type, chosen, gallery);
+      toast('Gambar dipilih sebagai aktif!', 'success');
+    }
+
+    function hapusGaleri(type, idx) {
+      var state = getGaleriState(type);
+      var gallery = state.gallery.slice();
+      gallery.splice(idx, 1);
+      setGaleriState(type, state.active, gallery);
+      toast('Gambar dihapus dari daftar', 'success');
+    }
+
+    function hapusGaleriAktif(type) {
+      if (!confirm('Hapus gambar yang sedang digunakan?')) return;
+      var state = getGaleriState(type);
+      // Aktifkan gambar pertama di gallery jika ada
+      var gallery = state.gallery.slice();
+      var newActive = gallery.length > 0 ? gallery.shift() : '';
+      setGaleriState(type, newActive, gallery);
+      toast('Gambar aktif dihapus', 'success');
+    }
+
+    // Fungsi lama tetap ada untuk proses file umum
     function processFileToDataUrl(input, previewEl, hiddenInput) {
        if(input.files && input.files[0]) {
          var file = input.files[0];
@@ -2736,7 +2890,7 @@
            img.onload = function() {
              var canvas = document.createElement('canvas');
              var ctx = canvas.getContext('2d');
-             var MAX_WIDTH = 600; var MAX_HEIGHT = 600;
+             var MAX_WIDTH = 400; var MAX_HEIGHT = 400;
              var width = img.width; var height = img.height;
              if (width > height) {
                if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
@@ -2745,16 +2899,16 @@
              }
              canvas.width = width; canvas.height = height;
              ctx.drawImage(img, 0, 0, width, height);
-             var dataUrl = canvas.toDataURL('image/jpeg', 0.6);
-             previewEl.style.backgroundImage = 'url(\'' + dataUrl + '\')';
-             previewEl.style.display = 'block';
-             hiddenInput.value = dataUrl;
+             var dataUrl = canvas.toDataURL('image/jpeg', 0.5);
+             if(previewEl) { previewEl.style.backgroundImage = 'url(\'' + dataUrl + '\')'; previewEl.style.display = 'block'; }
+             if(hiddenInput) hiddenInput.value = dataUrl;
            }
            img.src = e.target.result;
          }
          reader.readAsDataURL(file);
        }
     }
+
 
     async function savePengaturan(btn) {
        var p = dbGet('pengaturan');
@@ -3129,8 +3283,8 @@
          thumb.style.backgroundRepeat = 'no-repeat';
          thumb.style.backgroundPosition = 'center';
          
-         nameEl.textContent = info.type === 'khusus' ? 'ðŸŒŸ ' + info.pakaian.nama : info.pakaian.nama;
-         var activityText = info.kegiatan ? '<div style="font-size:16px; font-weight:700; margin-top:4px;">ðŸ“Œ ' + info.kegiatan + '</div>' : '';
+         nameEl.innerHTML = (info.type === 'khusus' ? '<span class="ms" style="color:#facc15; font-size:inherit; vertical-align:-3px; margin-right:6px; text-shadow:none;">star</span>' : '') + info.pakaian.nama;
+         var activityText = info.kegiatan ? '<div style="font-size:16px; font-weight:700; margin-top:4px;"><span class="ms" style="font-size:18px; vertical-align:-4px; margin-right:4px; color:#ef4444;">push_pin</span> ' + info.kegiatan + '</div>' : '';
          descEl.innerHTML = activityText + '<div style="margin-top:6px; opacity:0.9">' + (info.pakaian.desc || 'Seragam sesuai jadwal') + '</div>';
       } else {
          // Hari libur â€” gambar libur tampil di thumbnail
