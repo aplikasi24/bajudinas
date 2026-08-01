@@ -460,16 +460,25 @@
   <section id="publik-view" class="view" style="display:none; flex-direction:column; align-items:center; padding:32px 16px; min-height:100vh; background:var(--bg)">
     <div style="width:100%; max-width:800px; margin:0 auto; background:var(--surface); padding:32px; border-radius:var(--r-lg); border:1px solid var(--border); box-shadow:0 20px 40px rgba(0,0,0,0.05); text-align:center;">
       <h2 id="pub-sekolah-name" style="font-size:24px; font-weight:800; color:var(--text); margin-bottom:4px; letter-spacing:-0.5px">Nama Sekolah</h2>
-      <p style="font-size:15px; color:var(--muted); margin-bottom:32px; line-height:1.5">Jadwal Seragam Hari Ini<br><span id="pub-today-date" style="font-weight:700; color:var(--primary); font-size:16px;"></span></p>
+      <p style="font-size:15px; color:var(--muted); margin-bottom:24px; line-height:1.5">Jadwal Seragam Hari Ini<br><span id="pub-today-date" style="font-weight:700; color:var(--primary); font-size:16px;"></span></p>
 
-      <div id="pub-today-card" style="background:linear-gradient(135deg, var(--surface), var(--glass-bg)); border:1px solid var(--border); border-radius:var(--r-md); padding:32px; margin-bottom:32px; box-shadow: 0 10px 30px rgba(0,0,0,0.04);">
-         <div id="pub-today-glow-wrap" style="position:relative; width:320px; height:320px; margin:0 auto 32px; border-radius:24px; z-index:1; display:flex; align-items:center; justify-content:center;">
-           <div id="pub-anim-1" style="position:absolute; inset:-8px; border-radius:32px; background:conic-gradient(from 0deg, transparent 50%, var(--glow-color) 100%); animation: spinGlow 2.5s linear infinite; z-index:-1;"></div>
-           <div id="pub-anim-2" style="position:absolute; inset:-8px; border-radius:32px; background:var(--glow-color); filter:blur(20px); opacity:0.5; animation: pulseGlow 2.5s ease-in-out infinite; z-index:-2;"></div>
-           <div id="pub-today-thumb" style="width:100%; height:100%; border-radius:24px; background-size:cover; background-position:center; background-color:var(--surface); z-index:1; border:6px solid var(--surface)"></div>
-         </div>
-         <h3 id="pub-today-name" style="font-size:24px; font-weight:800; color:var(--primary); margin-bottom:8px; letter-spacing:-0.5px">Memuat...</h3>
-         <p id="pub-today-desc" style="font-size:15px; color:var(--text);"></p>
+      <!-- Kartu utama dengan background penuh -->
+      <div id="pub-today-card" style="position:relative; background:linear-gradient(135deg, var(--surface), var(--glass-bg)); border:2px solid var(--border); border-radius:var(--r-md); margin-bottom:32px; box-shadow:0 10px 30px rgba(0,0,0,0.08); overflow:hidden; min-height:420px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 32px;">
+        <!-- Layer background gambar (full card) -->
+        <div id="pub-card-bg" style="position:absolute; inset:0; background-size:cover; background-position:center; z-index:0;"></div>
+        <!-- Layer overlay gelap agar teks tetap terbaca -->
+        <div id="pub-card-overlay" style="position:absolute; inset:0; background:rgba(0,0,0,0); z-index:1; transition:background 0.3s;"></div>
+
+        <!-- Konten (di atas background) -->
+        <div style="position:relative; z-index:2; width:100%; display:flex; flex-direction:column; align-items:center;">
+          <div id="pub-today-glow-wrap" style="position:relative; width:280px; height:280px; margin:0 auto 24px; border-radius:24px; z-index:1; display:flex; align-items:center; justify-content:center;">
+            <div id="pub-anim-1" style="position:absolute; inset:-8px; border-radius:32px; background:conic-gradient(from 0deg, transparent 50%, var(--glow-color) 100%); animation: spinGlow 2.5s linear infinite; z-index:-1;"></div>
+            <div id="pub-anim-2" style="position:absolute; inset:-8px; border-radius:32px; background:var(--glow-color); filter:blur(20px); opacity:0.5; animation: pulseGlow 2.5s ease-in-out infinite; z-index:-2;"></div>
+            <div id="pub-today-thumb" style="width:100%; height:100%; border-radius:24px; background-size:contain; background-position:center; background-repeat:no-repeat; background-color:rgba(255,255,255,0.15); z-index:1; border:6px solid rgba(255,255,255,0.3);"></div>
+          </div>
+          <h3 id="pub-today-name" style="font-size:26px; font-weight:800; color:var(--text); margin-bottom:8px; letter-spacing:-0.5px; text-shadow:0 2px 8px rgba(0,0,0,0.15);">Memuat...</h3>
+          <p id="pub-today-desc" style="font-size:15px; color:var(--text); opacity:0.9; text-shadow:0 1px 4px rgba(0,0,0,0.1);"></p>
+        </div>
       </div>
 
       <button class="btn btn-primary" style="width:100%; justify-content:center; max-width:400px; margin:0 auto; font-size:16px; height:48px; border-radius:var(--r-md)" onclick="document.getElementById('pub-kalender-wrap').style.display='block'; renderKalender(); this.style.display='none'">
@@ -3070,6 +3079,8 @@
       }
 
       var info = todayUniform(now);
+      var cardBg = document.getElementById('pub-card-bg');
+      var cardOverlay = document.getElementById('pub-card-overlay');
       var thumb = document.getElementById('pub-today-thumb');
       var nameEl = document.getElementById('pub-today-name');
       var descEl = document.getElementById('pub-today-desc');
@@ -3078,75 +3089,69 @@
          glowWrap.className = 'glow-' + now.getDay();
       }
       
-      // Background kustom (di belakang baju)
+      // === LAYER 1: Background kartu penuh (di belakang segalanya) ===
       var hasBgImage = setObj.pub_bg_type === 'image' && setObj.pub_bg_image && isValidFoto(setObj.pub_bg_image);
       var hasBgColor = setObj.pub_bg_type === 'color' && setObj.pub_bg_color;
       
+      if (hasBgImage) {
+         cardBg.style.backgroundImage = 'url("' + setObj.pub_bg_image + '")';
+         cardBg.style.backgroundColor = '';
+         cardOverlay.style.background = 'rgba(0,0,0,0.35)'; // overlay agar teks tetap terbaca
+         // Warnai juga teks agar kontras di atas background
+         nameEl.style.color = '#ffffff';
+         descEl.style.color = '#ffffff';
+      } else if (hasBgColor) {
+         cardBg.style.backgroundImage = 'none';
+         cardBg.style.backgroundColor = setObj.pub_bg_color;
+         cardOverlay.style.background = 'rgba(0,0,0,0)';
+         nameEl.style.color = 'var(--text)';
+         descEl.style.color = 'var(--text)';
+      } else {
+         cardBg.style.backgroundImage = 'none';
+         cardBg.style.backgroundColor = '';
+         cardOverlay.style.background = 'rgba(0,0,0,0)';
+         nameEl.style.color = 'var(--text)';
+         descEl.style.color = 'var(--text)';
+      }
+
       if (info.pakaian && info.pakaian.nama !== 'Belum diatur' && info.pakaian.nama !== 'Libur') {
          var hasFoto = info.pakaian.foto && isValidFoto(info.pakaian.foto);
          
-         // Susun background: foto baju (contain) + background kustom (cover) dipisah melalui CSS multiple background
-         if (hasFoto && hasBgImage) {
-            thumb.style.backgroundImage = 'url("' + info.pakaian.foto + '"), url("' + setObj.pub_bg_image + '")';
-            thumb.style.backgroundSize = 'contain, cover';
-            thumb.style.backgroundRepeat = 'no-repeat, no-repeat';
-            thumb.style.backgroundPosition = 'center, center';
-            thumb.style.backgroundColor = '';
-         } else if (hasFoto && hasBgColor) {
+         // Thumbnail: hanya foto baju (contain), warna baju sebagai backgroundColor
+         if (hasFoto) {
             thumb.style.backgroundImage = 'url("' + info.pakaian.foto + '")';
-            thumb.style.backgroundSize = 'contain';
-            thumb.style.backgroundRepeat = 'no-repeat';
-            thumb.style.backgroundPosition = 'center';
-            thumb.style.backgroundColor = setObj.pub_bg_color;
-         } else if (hasFoto) {
-            thumb.style.backgroundImage = 'url("' + info.pakaian.foto + '")';
-            thumb.style.backgroundSize = 'contain';
-            thumb.style.backgroundRepeat = 'no-repeat';
-            thumb.style.backgroundPosition = 'center';
-            thumb.style.backgroundColor = info.pakaian.warna || '#f1f5f9';
-         } else if (hasBgImage) {
-            thumb.style.backgroundImage = 'url("' + setObj.pub_bg_image + '")';
-            thumb.style.backgroundSize = 'cover';
-            thumb.style.backgroundPosition = 'center';
-            thumb.style.backgroundColor = '';
-         } else if (hasBgColor) {
-            thumb.style.backgroundImage = 'none';
-            thumb.style.backgroundColor = setObj.pub_bg_color;
+            thumb.style.backgroundColor = hasBgImage ? 'rgba(255,255,255,0.1)' : (info.pakaian.warna || '#f1f5f9');
          } else {
             thumb.style.backgroundImage = 'none';
             thumb.style.backgroundColor = info.pakaian.warna || '#2563eb';
          }
+         thumb.style.backgroundSize = 'contain';
+         thumb.style.backgroundRepeat = 'no-repeat';
+         thumb.style.backgroundPosition = 'center';
          
          nameEl.textContent = info.type === 'khusus' ? 'ðŸŒŸ ' + info.pakaian.nama : info.pakaian.nama;
-         var activityText = info.kegiatan ? '<div style="font-size:16px; font-weight:700; color:var(--primary); margin-top:4px;">ðŸ“Œ ' + info.kegiatan + '</div>' : '';
+         var activityText = info.kegiatan ? '<div style="font-size:16px; font-weight:700; margin-top:4px;">ðŸ“Œ ' + info.kegiatan + '</div>' : '';
          descEl.innerHTML = activityText + '<div style="margin-top:6px; opacity:0.9">' + (info.pakaian.desc || 'Seragam sesuai jadwal') + '</div>';
       } else {
-         // Hari libur
+         // Hari libur â€” gambar libur tampil di thumbnail
          var hasLiburImg = setObj.libur_image && isValidFoto(setObj.libur_image);
          var liburTxt = setObj.libur_text || 'Hari ini sekolah libur';
          
-         if (hasLiburImg && hasBgImage) {
-            thumb.style.backgroundImage = 'url("' + setObj.libur_image + '"), url("' + setObj.pub_bg_image + '")';
-            thumb.style.backgroundSize = 'contain, cover';
-            thumb.style.backgroundRepeat = 'no-repeat, no-repeat';
-            thumb.style.backgroundPosition = 'center, center';
-            thumb.style.backgroundColor = '';
-         } else if (hasLiburImg && hasBgColor) {
+         if (hasLiburImg) {
             thumb.style.backgroundImage = 'url("' + setObj.libur_image + '")';
-            thumb.style.backgroundSize = 'contain';
-            thumb.style.backgroundRepeat = 'no-repeat';
-            thumb.style.backgroundPosition = 'center';
-            thumb.style.backgroundColor = setObj.pub_bg_color;
-         } else if (hasLiburImg) {
-            thumb.style.backgroundImage = 'url("' + setObj.libur_image + '")';
-            thumb.style.backgroundSize = 'contain';
-            thumb.style.backgroundRepeat = 'no-repeat';
-            thumb.style.backgroundPosition = 'center';
-            thumb.style.backgroundColor = '#fee2e2';
+            thumb.style.backgroundColor = hasBgImage ? 'rgba(255,255,255,0.1)' : '#fee2e2';
+         } else if (!hasBgImage && !hasBgColor) {
+            // Jika tidak ada background sama sekali, warnai kartu merah
+            cardBg.style.backgroundColor = '#f87171';
+            thumb.style.backgroundImage = 'none';
+            thumb.style.backgroundColor = 'rgba(255,255,255,0.2)';
          } else {
             thumb.style.backgroundImage = 'none';
-            thumb.style.backgroundColor = hasBgColor ? setObj.pub_bg_color : '#f87171';
+            thumb.style.backgroundColor = 'rgba(255,255,255,0.15)';
          }
+         thumb.style.backgroundSize = 'contain';
+         thumb.style.backgroundRepeat = 'no-repeat';
+         thumb.style.backgroundPosition = 'center';
          
          nameEl.textContent = 'Libur / Bebas';
          descEl.textContent = liburTxt;
