@@ -2295,9 +2295,10 @@
             document.getElementById('fp-foto-b64').value = dataUrl;
           }
           img.src = e.target.result;
+        }
+        reader.readAsDataURL(file);
       }
     }
-
     function createPakaianRow(data) {
       var rowId = Date.now() + Math.floor(Math.random() * 1000);
       var html = `
