@@ -1135,7 +1135,7 @@
     
     // URL Web App Google Apps Script
     // MASUKKAN URL HASIL DEPLOY DI SINI
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz4gYsgnHYL7I9471xMyKKRxWX_oyoHGzDL7XzeEK3KsQg3r5mIAruCPa836MXm-ojT/exec"; 
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbydu7VklCVBU308fYE1nkYs1KL6BmBYOBNlHpDRoLPVTFP2iLfZK_a9la2AHll08LDE/exec"; 
 
     var currentSekolahId = 'DEFAULT'; // State penyimpan sekolah aktif
     var currentUserRole = '';
@@ -1972,7 +1972,7 @@
       document.getElementById('tb-pakaian').innerHTML = data.map(function(d){
         var bgVal = d.warna || '#ccc';
         var thumb = isValidFoto(d.foto)
-            ? '<div style="width:36px;height:36px;border-radius:6px;background-color:'+bgVal+';background-image:url('+d.foto+');background-size:cover;background-position:center;"></div>' 
+            ? '<div style="width:36px;height:36px;border-radius:6px;background-color:'+bgVal+';background-image:url(\''+d.foto+'\');background-size:cover;background-position:center;"></div>' 
             : '<div style="width:36px;height:36px;border-radius:6px;background-color:'+bgVal+';"></div>';
         return '<tr>'+
           '<td>'+thumb+'</td>'+
@@ -2752,10 +2752,7 @@
         var dateHtml = d;
         var dClass = 'cal-date';
         
-        if (d === 1) {
-          dateHtml = '<img src="file:///C:/Users/LENOVO/.gemini/antigravity/brain/81d148a4-1591-40e2-ad30-913c131c9d92/.user_uploaded/media__1785422177482.png" style="width:28px; height:28px; vertical-align:middle; object-fit:contain" alt="1">';
-          dClass += ' cal-date-today'; // Hilangkan background putih untuk tumpeng
-        } else if (isToday) {
+        if (isToday) {
           dClass += ' cal-date-today';
         }
         
@@ -2769,7 +2766,7 @@
         if (isLibur) {
           thumbHtml = '<div style="display:flex; flex:1; align-items:center; justify-content:center; color:var(--danger); font-weight:800; font-size:16px; text-transform:uppercase; letter-spacing:1px; opacity:0.7">Libur</div>';
         } else if (info.pakaian && info.pakaian.nama !== 'Belum diatur' && info.pakaian.nama !== 'Libur') {
-          var bg = info.pakaian.foto ? 'url('+info.pakaian.foto+')' : info.pakaian.warna;
+          var bg = info.pakaian.foto ? 'url(\''+info.pakaian.foto+'\')' : info.pakaian.warna;
           var name = info.pakaian.nama;
           if (info.type === 'khusus') name = 'ðŸŒŸ ' + name;
           var kegHtml = info.kegiatan ? '<div style="font-size:9px; font-weight:normal; margin-top:2px; opacity:0.9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#fff">' + info.kegiatan + '</div>' : '';
@@ -3152,7 +3149,7 @@
           var descHtml = 'Silakan sesuaikan dengan ketentuan sekolah.';
           
           if (info.pakaian && info.pakaian.nama !== 'Belum diatur' && info.pakaian.nama !== 'Libur') {
-             bgVal = info.pakaian.foto ? 'url('+info.pakaian.foto+')' : info.pakaian.warna;
+             bgVal = info.pakaian.foto ? 'url(\''+info.pakaian.foto+'\')' : info.pakaian.warna;
              nameHtml = info.type === 'khusus' ? 'ðŸŒŸ ' + info.pakaian.nama : info.pakaian.nama;
              descHtml = info.pakaian.desc || 'Seragam Pakaian Dinas Guru';
           }
