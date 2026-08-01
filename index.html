@@ -399,6 +399,8 @@
 
     /* Mobile Adjustments */
     @media(max-width:600px) {
+      .login-card { padding: 32px 24px; margin: 16px; width: 100%; box-sizing: border-box; }
+      .login-card h1 { font-size: 24px; }
       #publik-view { padding: 12px 8px; }
       #publik-view > div { padding: 20px 16px; }
       #pub-today-card { padding: 20px; margin-bottom: 24px; }
@@ -407,7 +409,7 @@
       #pub-today-name { font-size: 20px; }
       #pub-kalender-wrap { padding-top: 20px; margin-top: 20px; }
       .cal-title { font-size: 16px; }
-      .cal-grid { gap: 4px; min-width: 580px; } /* Slightly tighter on mobile to reduce scroll */
+      .cal-grid { gap: 4px; min-width: 580px; }
       .cal-day-head { font-size: 10px; min-height: 28px; }
       .cal-cell { min-height: 80px; padding: 4px; }
       .cal-thumb-name { font-size: 9px; padding: 2px; }
@@ -435,6 +437,19 @@
     <p id="pdf-status" style="font-size:15px; color:rgba(255,255,255,0.8)">Harap tunggu, jangan tutup halaman ini.</p>
   </div>
   <div id="pdf-render-zone"></div>
+  
+  <!-- Login Loading Overlay -->
+  <div id="login-loading-overlay" style="display:none; position:fixed; inset:0; background:rgba(255,255,255,0.9); z-index:99999; flex-direction:column; align-items:center; justify-content:center; backdrop-filter:blur(8px);">
+    <div style="position:relative; width:120px; height:120px; display:flex; align-items:center; justify-content:center;">
+      <svg viewBox="0 0 100 100" style="position:absolute; inset:0; width:100%; height:100%; transform:rotate(-90deg);">
+        <circle cx="50" cy="50" r="45" fill="none" stroke="#e2e8f0" stroke-width="8"></circle>
+        <circle id="login-progress-circle" cx="50" cy="50" r="45" fill="none" stroke="var(--primary)" stroke-width="8" stroke-dasharray="283" stroke-dashoffset="283" stroke-linecap="round" style="transition:stroke-dashoffset 0.1s linear;"></circle>
+      </svg>
+      <div id="login-progress-text" style="font-size:28px; font-weight:900; color:var(--primary); font-family:'Inter',sans-serif;">0%</div>
+    </div>
+    <h3 style="margin-top:24px; font-size:20px; font-weight:800; color:var(--text); letter-spacing:-0.5px;">Mempersiapkan Ruang Kerja</h3>
+    <p style="font-size:14px; color:var(--muted); margin-top:8px;">Harap tunggu sebentar...</p>
+  </div>
 
   <!-- Toast container -->
   <div id="toasts"></div>
@@ -600,6 +615,7 @@
         <div class="nav-link" onclick="openTab('pakaian',this)"><span class="ms">checkroom</span> Master Pakaian</div>
         <div class="nav-link" onclick="openTab('jadwal',this)"><span class="ms">calendar_month</span> Jadwal Mingguan</div>
         <div class="nav-link" onclick="openTab('khusus',this)"><span class="ms">celebration</span> Hari Khusus</div>
+        <div class="nav-link" onclick="openTab('pengaturan',this)"><span class="ms">settings</span> Pengaturan Publik</div>
         <div class="nav-link" id="menu-logs-desktop" style="display:none;" onclick="openTab('logs',this)"><span class="ms">history</span> Log Aktivitas</div>
       </div>
       <div class="nav-link danger" style="margin-top:auto" onclick="doLogout()"><span class="ms">logout</span> Logout</div>
@@ -612,6 +628,7 @@
       <div class="bn-item" onclick="openTab('pakaian',this)"><span class="ms">checkroom</span><span>Pakaian</span></div>
       <div class="bn-item" onclick="openTab('jadwal',this)"><span class="ms">calendar_month</span><span>Jadwal</span></div>
       <div class="bn-item" onclick="openTab('khusus',this)"><span class="ms">celebration</span><span>Khusus</span></div>
+      <div class="bn-item" onclick="openTab('pengaturan',this)"><span class="ms">settings</span><span>Seting</span></div>
       <div class="bn-item" id="menu-logs-mobile" style="display:none;" onclick="openTab('logs',this)"><span class="ms">history</span><span>Logs</span></div>
       <div class="bn-item" onclick="doLogout()"><span class="ms" style="color:var(--danger); font-size:24px">logout</span><span style="color:var(--danger)">Logout</span></div>
     </nav>
@@ -788,6 +805,69 @@
           <div class="cal-grid" id="cal-grid"></div>
         </div>
         <div id="cal-legend" style="margin-top:8px"></div>
+      </div>
+
+      <!-- Tab: Pengaturan -->
+      <div id="tab-pengaturan" class="admin-tab">
+        <div class="ph" style="flex-wrap:wrap"><div><h2>Pengaturan Publik</h2><p>Personalisasi tautan publik dan hari libur</p></div>
+           <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+             <button class="btn btn-outline btn-sm" onclick="shareWA()" style="border-color:#25D366; color:#25D366"><span class="ms" style="font-size:18px">whatsapp</span> Bagikan ke WA</button>
+             <button class="btn btn-outline btn-sm" onclick="copyPublicLink()"><span class="ms" style="font-size:18px">content_copy</span> Salin Tautan</button>
+             <button class="btn btn-primary btn-sm" onclick="savePengaturan(this)"><span class="ms" style="font-size:18px">save</span> Simpan</button>
+           </div>
+        </div>
+        
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:24px;">
+          <!-- Kartu: Pengaturan Publik -->
+          <div class="glass" style="padding:24px; border-radius:var(--r-lg);">
+            <h3 style="margin-bottom:16px; display:flex; align-items:center; gap:8px"><span class="ms" style="color:var(--primary)">public</span> Tampilan Publik</h3>
+            <div class="input-wrap">
+              <label>Teks Sambutan (Publik)</label>
+              <input type="text" id="set-pub-text" placeholder="Contoh: Jadwal Seragam Hari Ini">
+            </div>
+            <div class="input-wrap" style="display:flex; align-items:center; gap:8px;">
+              <input type="checkbox" id="set-pub-anim" style="width:18px;height:18px;cursor:pointer">
+              <label for="set-pub-anim" style="margin:0;cursor:pointer">Aktifkan Animasi Berputar (Frame Foto)</label>
+            </div>
+            <div class="input-wrap">
+              <label>Warna Frame Berputar</label>
+              <input type="color" id="set-pub-frame-color" value="#eab308" style="height:40px;width:100%;padding:4px">
+            </div>
+            <div class="input-wrap">
+              <label>Tipe Background Publik</label>
+              <select id="set-pub-bg-type" onchange="togglePubBgType()">
+                <option value="color">Warna Solid</option>
+                <option value="image">Gambar / Foto</option>
+              </select>
+            </div>
+            <div class="input-wrap" id="wrap-pub-bg-color">
+              <label>Warna Background</label>
+              <input type="color" id="set-pub-bg-color" value="#f8fafc" style="height:40px;width:100%;padding:4px">
+            </div>
+            <div class="input-wrap" id="wrap-pub-bg-image" style="display:none">
+              <label>Unggah Gambar Background</label>
+              <input type="file" id="set-pub-bg-file" accept="image/*" onchange="previewSetBg(this)">
+              <div id="set-pub-bg-preview" style="width:100%;height:100px;margin-top:8px;background-size:cover;background-position:center;border-radius:8px;display:none;background-color:rgba(0,0,0,0.1)"></div>
+              <input type="hidden" id="set-pub-bg-b64">
+            </div>
+          </div>
+          
+          <!-- Kartu: Pengaturan Hari Libur -->
+          <div class="glass" style="padding:24px; border-radius:var(--r-lg);">
+            <h3 style="margin-bottom:16px; display:flex; align-items:center; gap:8px"><span class="ms" style="color:var(--danger)">beach_access</span> Khusus Hari Libur</h3>
+            <p style="font-size:13px; color:var(--muted); margin-bottom:16px">Teks dan gambar ini akan otomatis muncul pada hari Sabtu/Minggu (jika diset libur) atau pada tanggal yang ditandai libur.</p>
+            <div class="input-wrap">
+              <label>Teks Keterangan Libur</label>
+              <input type="text" id="set-libur-text" placeholder="Contoh: Hari ini sekolah libur">
+            </div>
+            <div class="input-wrap">
+              <label>Gambar Hari Libur (Opsional)</label>
+              <input type="file" id="set-libur-file" accept="image/*" onchange="previewSetLibur(this)">
+              <div id="set-libur-preview" style="width:100%;height:100px;margin-top:8px;background-size:cover;background-position:center;border-radius:8px;display:none;background-color:rgba(0,0,0,0.1)"></div>
+              <input type="hidden" id="set-libur-b64">
+            </div>
+          </div>
+        </div>
       </div>
 
     </main>
@@ -1048,7 +1128,7 @@
     
     // URL Web App Google Apps Script
     // MASUKKAN URL HASIL DEPLOY DI SINI
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbydu7VklCVBU308fYE1nkYs1KL6BmBYOBNlHpDRoLPVTFP2iLfZK_a9la2AHll08LDE/exec"; 
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx6WQ5lcGOJHC-UNwKKjXJsADJBPJQW_oabo7EPFPlduJIF42o2CpSuzUWxxiee4y1d/exec"; 
 
     var currentSekolahId = 'DEFAULT'; // State penyimpan sekolah aktif
     var currentUserRole = '';
@@ -1126,12 +1206,15 @@
     }
     
     // Fungsi khusus untuk mencatat log aktivitas
-    function catatLog(aksi) {
-      if(!APPS_SCRIPT_URL || !currentAkun) return;
-      var username = currentAkun.username + " (" + currentAkun.nama + ")";
+    function catatLog(aksi, akunOverride, sekolahIdOverride) {
+      if(!APPS_SCRIPT_URL) return;
+      var targetAkun = akunOverride || currentAkun;
+      var targetSekolah = sekolahIdOverride || currentSekolahId;
+      if(!targetAkun) return;
+      var username = targetAkun.username + " (" + targetAkun.nama + ")";
       fetch(APPS_SCRIPT_URL, {
         method: 'POST',
-        body: JSON.stringify({ action: 'add_log', sekolahId: currentSekolahId, username: username, aksi: aksi }),
+        body: JSON.stringify({ action: 'add_log', sekolahId: targetSekolah, username: username, aksi: aksi }),
         headers: { 'Content-Type': 'text/plain;charset=utf-8' }
       }).catch(err => console.error("Gagal catat log", err));
     }
@@ -1444,6 +1527,7 @@
       if(tab==='pakaian') renderPakaian();
       if(tab==='jadwal') { renderMasterKegiatan(); renderJadwal(); }
       if(tab==='khusus')  renderKhusus();
+      if(tab==='pengaturan') loadPengaturan();
       if(tab==='logs')    renderLogs();
     }
 
@@ -1512,12 +1596,40 @@
         if(mLogsM) mLogsM.style.display = 'flex';
       }
 
-      showView('admin-view');
-      renderDash();
-      toast('Selamat datang, '+akun.nama+'!','success');
+      // Jalankan animasi persentase 1-100
+      var overlay = document.getElementById('login-loading-overlay');
+      var circle = document.getElementById('login-progress-circle');
+      var text = document.getElementById('login-progress-text');
+      overlay.style.display = 'flex';
       
-      if(btn && btn.tagName === 'BUTTON') { btn.innerHTML = oriText; btn.disabled = false; }
-      }, 600); // Simulasi delay seolah-olah mengecek ke server
+      var progress = 0;
+      var totalDash = 283; // Circumference of circle (2 * pi * 45)
+      
+      var interval = setInterval(function() {
+         progress += Math.floor(Math.random() * 15) + 5; // Naik random 5-20%
+         if(progress >= 100) progress = 100;
+         
+         text.textContent = progress + '%';
+         var offset = totalDash - (progress / 100) * totalDash;
+         circle.style.strokeDashoffset = offset;
+         
+         if(progress >= 100) {
+            clearInterval(interval);
+            setTimeout(function() {
+               overlay.style.display = 'none';
+               circle.style.strokeDashoffset = totalDash; // reset
+               text.textContent = '0%';
+               
+               // Lanjut masuk ke dashboard
+               showView('admin-view');
+               renderDash();
+               toast('Selamat datang, '+akun.nama+'!','success');
+               
+               if(btn && btn.tagName === 'BUTTON') { btn.innerHTML = oriText; btn.disabled = false; }
+            }, 400); // Tahan 100% sebentar biar terlihat smooth
+         }
+      }, 100);
+      }, 200); // Simulasi delay awal
     }
 
     function doRegister() {
@@ -1588,6 +1700,8 @@
 
       currentSekolahId = tempId; // Kembalikan ke konteks semula
 
+      catatLog('Registrasi Akun Baru: ' + user, newGuru, sId);
+
       toast('Registrasi berhasil! Silakan login.', 'success');
       showView('login-view');
       
@@ -1641,8 +1755,8 @@
       var desc  = document.getElementById('uniform-desc');
 
       if(isValidFoto(info.pakaian.foto)) {
+        card.style.backgroundColor = info.pakaian.warna||'#ccc'; // fallback color if image broken
         card.style.backgroundImage = 'url(' + info.pakaian.foto + ')';
-        card.style.backgroundColor = '#000'; // fallback
       } else {
         card.style.backgroundImage = 'none';
         card.style.backgroundColor = info.pakaian.warna||'#2563eb';
@@ -1805,8 +1919,8 @@
       
       var thumb = document.getElementById('admin-today-thumb');
       if(isValidFoto(info.pakaian.foto)) {
+        thumb.style.backgroundColor = info.pakaian.warna||'#ccc';
         thumb.style.backgroundImage = 'url(' + info.pakaian.foto + ')';
-        thumb.style.backgroundColor = '#000';
       } else {
         thumb.style.backgroundImage = 'none';
         thumb.style.backgroundColor = info.pakaian.warna||'#2563eb';
@@ -1849,9 +1963,10 @@
     function renderPakaian(){
       var data = dbGet('pakaian');
       document.getElementById('tb-pakaian').innerHTML = data.map(function(d){
+        var bgVal = d.warna || '#ccc';
         var thumb = isValidFoto(d.foto)
-            ? '<div style="width:36px;height:36px;border-radius:6px;background:url('+d.foto+') center/cover"></div>' 
-            : '<div style="width:36px;height:36px;border-radius:6px;background:'+d.warna+'"></div>';
+            ? '<div style="width:36px;height:36px;border-radius:6px;background-color:'+bgVal+';background-image:url('+d.foto+');background-size:cover;background-position:center;"></div>' 
+            : '<div style="width:36px;height:36px;border-radius:6px;background-color:'+bgVal+';"></div>';
         return '<tr>'+
           '<td>'+thumb+'</td>'+
           '<td><div style="font-weight:600">'+d.nama+'</div></td>'+
@@ -2401,10 +2516,156 @@
            sel.style.color = '#fff';
          }
       } else {
-         sel.style.backgroundColor = '';
-         sel.style.color = '';
+         sel.style.backgroundColor = 'transparent';
+         sel.style.color = 'var(--text)';
       }
     }
+
+    // ================================================
+    // PENGATURAN PUBLIK & HARI LIBUR
+    // ================================================
+    function loadPengaturan() {
+       var p = dbGet('pengaturan');
+       if(!Array.isArray(p)) p = [];
+       // Convert array of {id, Kunci, Nilai} to object
+       var obj = {};
+       p.forEach(function(item) { obj[item.Kunci] = item.Nilai; });
+       
+       document.getElementById('set-pub-text').value = obj.pub_text || '';
+       document.getElementById('set-pub-anim').checked = (obj.pub_anim === 'true');
+       document.getElementById('set-pub-frame-color').value = obj.pub_frame_color || '#eab308';
+       document.getElementById('set-pub-bg-type').value = obj.pub_bg_type || 'color';
+       document.getElementById('set-pub-bg-color').value = obj.pub_bg_color || '#f8fafc';
+       document.getElementById('set-pub-bg-b64').value = obj.pub_bg_image || '';
+       document.getElementById('set-libur-text').value = obj.libur_text || '';
+       document.getElementById('set-libur-b64').value = obj.libur_image || '';
+       
+       var pbPreview = document.getElementById('set-pub-bg-preview');
+       if(obj.pub_bg_image && isValidFoto(obj.pub_bg_image)) {
+          pbPreview.style.backgroundImage = 'url('+obj.pub_bg_image+')';
+          pbPreview.style.display = 'block';
+       }
+       
+       var libPreview = document.getElementById('set-libur-preview');
+       if(obj.libur_image && isValidFoto(obj.libur_image)) {
+          libPreview.style.backgroundImage = 'url('+obj.libur_image+')';
+          libPreview.style.display = 'block';
+       }
+       
+       togglePubBgType();
+    }
+
+    function togglePubBgType() {
+       var type = document.getElementById('set-pub-bg-type').value;
+       document.getElementById('wrap-pub-bg-color').style.display = type === 'color' ? 'block' : 'none';
+       document.getElementById('wrap-pub-bg-image').style.display = type === 'image' ? 'block' : 'none';
+    }
+
+    function previewSetBg(input) {
+       var prev = document.getElementById('set-pub-bg-preview');
+       var b64Inp = document.getElementById('set-pub-bg-b64');
+       processFileToDataUrl(input, prev, b64Inp);
+    }
+    
+    function previewSetLibur(input) {
+       var prev = document.getElementById('set-libur-preview');
+       var b64Inp = document.getElementById('set-libur-b64');
+       processFileToDataUrl(input, prev, b64Inp);
+    }
+    
+    function processFileToDataUrl(input, previewEl, hiddenInput) {
+       if(input.files && input.files[0]) {
+         var file = input.files[0];
+         var reader = new FileReader();
+         reader.onload = function(e) {
+           var img = new Image();
+           img.onload = function() {
+             var canvas = document.createElement('canvas');
+             var ctx = canvas.getContext('2d');
+             var MAX_WIDTH = 1200; var MAX_HEIGHT = 1200;
+             var width = img.width; var height = img.height;
+             if (width > height) {
+               if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+             } else {
+               if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+             }
+             canvas.width = width; canvas.height = height;
+             ctx.drawImage(img, 0, 0, width, height);
+             var dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+             previewEl.style.backgroundImage = 'url(' + dataUrl + ')';
+             previewEl.style.display = 'block';
+             hiddenInput.value = dataUrl;
+           }
+           img.src = e.target.result;
+         }
+         reader.readAsDataURL(file);
+       }
+    }
+
+    async function savePengaturan(btn) {
+       var p = dbGet('pengaturan');
+       if(!Array.isArray(p)) p = [];
+       
+       var obj = {
+          pub_text: document.getElementById('set-pub-text').value.trim(),
+          pub_anim: document.getElementById('set-pub-anim').checked ? 'true' : 'false',
+          pub_frame_color: document.getElementById('set-pub-frame-color').value,
+          pub_bg_type: document.getElementById('set-pub-bg-type').value,
+          pub_bg_color: document.getElementById('set-pub-bg-color').value,
+          pub_bg_image: document.getElementById('set-pub-bg-b64').value,
+          libur_text: document.getElementById('set-libur-text').value.trim(),
+          libur_image: document.getElementById('set-libur-b64').value
+       };
+
+       var oriText = btn.innerHTML;
+       
+       // Handle uploads if needed
+       var keysToUpload = ['pub_bg_image', 'libur_image'];
+       for(var k of keysToUpload) {
+          if(obj[k] && obj[k].startsWith('data:image') && APPS_SCRIPT_URL) {
+             btn.innerHTML = '<span class="ms" style="animation:spin 1s linear infinite">refresh</span> Mengunggah...';
+             btn.disabled = true;
+             try {
+                var res = await fetch(APPS_SCRIPT_URL, {
+                   method: 'POST',
+                   body: JSON.stringify({
+                      action: 'upload_image',
+                      filename: 'settings_' + k + '_' + Date.now() + '.jpg',
+                      guruName: currentAkun ? currentAkun.nama : 'Admin',
+                      base64: obj[k]
+                   }),
+                   headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+                var json = await res.json();
+                if(json.status === 'success' && json.url) {
+                   obj[k] = json.url;
+                   document.getElementById(k === 'pub_bg_image' ? 'set-pub-bg-b64' : 'set-libur-b64').value = json.url;
+                }
+             } catch(e) {
+                console.error(e);
+                toast('Gagal mengunggah foto ' + k, 'error');
+             }
+          }
+       }
+       
+       // Update settings table
+       var newP = [];
+       for(var k in obj) {
+          newP.push({ id: 'SET_'+k, Kunci: k, Nilai: obj[k] });
+       }
+       dbSet('pengaturan', newP);
+       
+       toast('Pengaturan berhasil disimpan!', 'success');
+       catatLog('Memperbarui Pengaturan Publik');
+       
+       btn.innerHTML = oriText;
+       btn.disabled = false;
+       saveSuccessBtn(btn, null);
+    }
+    
+    // ================================================
+    // CORE INITIALIZATION
+    // ================================================
 
     // ================================================
     // LOGIKA KALENDER VISUAL
@@ -2595,6 +2856,44 @@
     function renderPublikView() {
       document.getElementById('pub-sekolah-name').textContent = currentSekolahId.replace(/_/g, ' ');
       
+      // Load pengaturan publik
+      var p = dbGet('pengaturan');
+      if(!Array.isArray(p)) p = [];
+      var setObj = {};
+      p.forEach(function(item) { setObj[item.Kunci] = item.Nilai; });
+      
+      // Apply Teks Sambutan
+      var welcomeText = setObj.pub_text || 'Jadwal Seragam Hari Ini';
+      var pubHeader = document.querySelector('#publik-view p');
+      if (pubHeader && pubHeader.innerHTML.includes('<br>')) {
+         pubHeader.innerHTML = welcomeText + '<br><span id="pub-today-date" style="font-weight:700; color:var(--primary); font-size:16px;"></span>';
+      }
+      
+      // Apply Background
+      var pubView = document.getElementById('publik-view');
+      if (setObj.pub_bg_type === 'image' && setObj.pub_bg_image && isValidFoto(setObj.pub_bg_image)) {
+         pubView.style.background = 'url(' + setObj.pub_bg_image + ') center/cover no-repeat fixed';
+      } else {
+         pubView.style.background = setObj.pub_bg_color || 'var(--bg)';
+      }
+      
+      // Apply Frame Anim
+      var glowWrap = document.getElementById('pub-today-glow-wrap');
+      var pubCard = document.getElementById('pub-today-card');
+      if(setObj.pub_anim !== 'true') {
+         glowWrap.style.animation = 'none';
+         glowWrap.style.boxShadow = 'none';
+      } else {
+         glowWrap.style.animation = 'spinGlow 4s linear infinite';
+      }
+      
+      // Apply Frame Color
+      if (setObj.pub_frame_color) {
+         glowWrap.style.setProperty('--glow-color', setObj.pub_frame_color);
+         glowWrap.style.background = 'linear-gradient(45deg, var(--glow-color), transparent)';
+         pubCard.style.borderColor = setObj.pub_frame_color;
+      }
+      
       // Deteksi jika data kosong (biasanya karena buka di Incognito / Browser lain)
       if (Object.keys(dbGet('jadwal')).length === 0) {
         var allGuru = dbGet('guru');
@@ -2612,22 +2911,38 @@
 
       var info = todayUniform(now);
       var thumb = document.getElementById('pub-today-thumb');
-      var glowWrap = document.getElementById('pub-today-glow-wrap');
       var nameEl = document.getElementById('pub-today-name');
       var descEl = document.getElementById('pub-today-desc');
       
-      if(glowWrap) glowWrap.className = 'glow-' + now.getDay();
+      if(!setObj.pub_frame_color) {
+         glowWrap.className = 'glow-' + now.getDay();
+      }
       
       if (info.pakaian && info.pakaian.nama !== 'Belum diatur' && info.pakaian.nama !== 'Libur') {
-        thumb.style.background = info.pakaian.foto ? 'url('+info.pakaian.foto+') center/cover' : info.pakaian.warna;
-        nameEl.textContent = info.pakaian.nama;
-        var activityText = info.kegiatan ? '<div style="font-size:16px; font-weight:700; color:var(--primary); margin-top:4px;">ðŸ“Œ ' + info.kegiatan + '</div>' : '';
-        descEl.innerHTML = activityText + '<div style="margin-top:6px; opacity:0.9">' + (info.pakaian.desc || 'Seragam sesuai jadwal') + '</div>';
-        if(info.type === 'khusus') nameEl.textContent = 'ðŸŒŸ ' + nameEl.textContent;
+         var bgVal = info.pakaian.warna || '#ccc';
+         thumb.style.backgroundColor = bgVal;
+         if(info.pakaian.foto && isValidFoto(info.pakaian.foto)) {
+            thumb.style.backgroundImage = 'url('+info.pakaian.foto+')';
+         } else {
+            thumb.style.backgroundImage = 'none';
+         }
+         nameEl.textContent = info.pakaian.nama;
+         var activityText = info.kegiatan ? '<div style="font-size:16px; font-weight:700; color:var(--primary); margin-top:4px;">ðŸ“Œ ' + info.kegiatan + '</div>' : '';
+         descEl.innerHTML = activityText + '<div style="margin-top:6px; opacity:0.9">' + (info.pakaian.desc || 'Seragam sesuai jadwal') + '</div>';
+         if(info.type === 'khusus') nameEl.textContent = 'ðŸŒŸ ' + nameEl.textContent;
       } else {
-        thumb.style.background = '#f87171';
-        nameEl.textContent = 'Libur / Bebas';
-        descEl.textContent = 'Tidak ada jadwal seragam hari ini';
+         var liburImg = setObj.libur_image && isValidFoto(setObj.libur_image) ? setObj.libur_image : '';
+         var liburTxt = setObj.libur_text || 'Hari ini sekolah libur';
+         
+         thumb.style.backgroundColor = liburImg ? '#000' : '#f87171';
+         if (liburImg) {
+            thumb.style.backgroundImage = 'url('+liburImg+')';
+         } else {
+            thumb.style.backgroundImage = 'none';
+         }
+         
+         nameEl.textContent = 'Libur / Bebas';
+         descEl.textContent = liburTxt;
       }
     }
 
