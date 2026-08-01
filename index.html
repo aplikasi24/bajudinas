@@ -2298,9 +2298,207 @@
         }
         reader.readAsDataURL(file);
       }
+    function createPakaianRow(data) {
+      var rowId = Date.now() + Math.floor(Math.random() * 1000);
+      var html = `
+      <div class="pakaian-row" data-rowid="`+rowId+`" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:16px; align-items:start; margin-bottom:16px; padding:16px; border:1px solid var(--border); border-radius:var(--r-md); background:var(--surface); position:relative">
+        <button class="btn-del-row btn btn-danger btn-sm" style="position:absolute; top:-10px; right:-10px; padding:4px; border-radius:50%; z-index:10; `+(data?'display:none':'')+`" onclick="this.parentElement.remove(); checkPakaianRows();" title="Hapus baris ini"><span class="ms" style="font-size:16px">close</span></button>
+        <div class="input-wrap" style="margin-bottom:0"><label>Nama Pakaian</label><input type="text" class="fp-nama" placeholder="contoh: PDH Khaki" value="`+(data?data.nama:'')+`"></div>
+        <div class="input-wrap" style="margin-bottom:0"><label>Warna Tema</label><input type="color" class="fp-warna" value="`+(data?(data.warna||'#2563eb'):'#2563eb')+`" style="height:48px;padding:4px;width:100%"></div>
+        <div style="display:flex; flex-direction:column; gap:8px">
+          <div class="input-wrap" style="margin-bottom:0"><label>Foto Seragam (Opsional)</label><input type="file" accept="image/*" style="padding-top:10px" onchange="previewFotoRow(this)"></div>
+          <div class="fp-preview" style="width:100%;height:100px;background-size:contain;background-repeat:no-repeat;background-position:center;border-radius:var(--r-md); display:`+(data&&isValidFoto(data.foto)?'block':'none')+`; background-color:rgba(0,0,0,0.2); `+(data&&isValidFoto(data.foto)?'background-image:url('+data.foto+')':'')+`"></div>
+          <input type="hidden" class="fp-foto-b64" value="`+(data?(data.foto||''):'')+`">
+        </div>
+        <div class="input-wrap" style="height:100%; margin-bottom:0; display:flex; flex-direction:column"><label>Deskripsi</label><textarea class="fp-desc" style="flex:1; min-height:80px; resize:none" placeholder="Keterangan singkat pakaian">`+(data?(data.desc||''):'')+`</textarea></div>
+      </div>
+      `;
+      var div = document.createElement('div');
+      div.innerHTML = html;
+      document.getElementById('fp-rows-container').appendChild(div.firstElementChild);
+      checkPakaianRows();
+    }
+    
+    function addPakaianRow() {
+       var rows = document.querySelectorAll('.pakaian-row');
+       if(rows.length >= 5) {
+          toast('Maksimal 5 pakaian sekaligus', 'warning');
+          return;
+       }
+       createPakaianRow(null);
+    }
+    
+    function checkPakaianRows() {
+       var rows = document.querySelectorAll('.pakaian-row');
+       var btnAdd = document.getElementById('btn-add-pakaian-row');
+       if(rows.length >= 5 || document.getElementById('fp-id').value !== '') {
+          btnAdd.style.display = 'none';
+       } else {
+          btnAdd.style.display = 'block';
+       }
+       if(rows.length <= 1) {
+          if (rows.length === 1) {
+              var delBtn = rows[0].querySelector('.btn-del-row');
+              if(delBtn) delBtn.style.display = 'none';
+          }
+       } else {
+          rows.forEach(function(r) {
+             var delBtn = r.querySelector('.btn-del-row');
+             if(delBtn) delBtn.style.display = 'block';
+          });
+       }
     }
 
+    function editPakaian(id){
+      var d = dbGet('pakaian').find(function(x){return x.id===id;});
+      if(!d) return;
+      document.getElementById('fp-id').value=d.id;
+      document.getElementById('fp-rows-container').innerHTML='';
+      createPakaianRow(d);
+      document.getElementById('m-pakaian-title').textContent='Edit Pakaian';
+      openModal('m-pakaian');
+    }
 
+    function previewFotoRow(input) {
+      if(input.files && input.files[0]) {
+        var file = input.files[0];
+        if(file.size > 5 * 1024 * 1024) toast('Ukuran file terlalu besar! Mencoba mengkompres...','warning');
+
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var img = new Image();
+          img.onload = function() {
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+            var MAX_WIDTH = 400;
+            var MAX_HEIGHT = 400;
+            var width = img.width;
+            var height = img.height;
+            if (width > height) {
+              if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+            } else {
+              if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+            }
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+            var dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+            
+            var row = input.closest('.pakaian-row');
+            var prev = row.querySelector('.fp-preview');
+            prev.style.backgroundImage = 'url(' + dataUrl + ')';
+            prev.style.display = 'block';
+            row.querySelector('.fp-foto-b64').value = dataUrl;
+          }
+          img.src = e.target.result;
+        }
+        reader.readAsDataURL(file);
+      }
+    }
+
+    async function savePakaian(btn){
+      var id = document.getElementById('fp-id').value;
+      var rows = document.querySelectorAll('.pakaian-row');
+      var validRows = [];
+      
+      for(var i=0; i<rows.length; i++) {
+         var r = rows[i];
+         var nama = r.querySelector('.fp-nama').value.trim();
+         if(!nama) continue;
+         var warna = r.querySelector('.fp-warna').value;
+         var desc = r.querySelector('.fp-desc').value.trim();
+         var b64 = r.querySelector('.fp-foto-b64').value;
+         validRows.push({nama: nama, warna: warna, desc: desc, b64: b64});
+      }
+      
+      if(validRows.length === 0) return toast('Minimal isi satu nama pakaian!','error');
+
+      var isUploading = false;
+      for(var i=0; i<validRows.length; i++) {
+         if(validRows[i].b64.startsWith('data:image')) isUploading = true;
+      }
+
+      var oriText = btn.innerHTML;
+      btn.disabled = true;
+      
+      var progInt;
+      if (isUploading && APPS_SCRIPT_URL) {
+         var pct = 0;
+         progInt = setInterval(function() {
+           pct += Math.floor(Math.random() * 10) + 2;
+           if(pct >= 95) pct = 95;
+           btn.innerHTML = '<span class="ms" style="animation:spin 1s linear infinite; font-size:16px; vertical-align:middle; margin-right:6px">autorenew</span> Mengunggah ' + pct + '%';
+         }, 150);
+      } else {
+         btn.innerHTML = '<span class="ms" style="animation:spin 1s linear infinite; font-size:16px; vertical-align:middle; margin-right:6px">autorenew</span> Menyimpan...';
+      }
+
+      try {
+         var pakaianData = dbGet('pakaian');
+         for(var i=0; i<validRows.length; i++) {
+            var row = validRows[i];
+            var finalFoto = '';
+            
+            if (id) {
+               var existing = pakaianData.find(function(x){ return x.id === id; });
+               if(existing) finalFoto = existing.foto;
+            }
+
+            if(row.b64.startsWith('data:image') && APPS_SCRIPT_URL) {
+               var safePakaianName = row.nama.replace(/[^a-zA-Z0-9 _-]/g, '').trim() || 'Pakaian';
+               var res = await fetch(APPS_SCRIPT_URL, {
+                 method: 'POST',
+                 body: JSON.stringify({
+                   action: 'upload_image',
+                   filename: safePakaianName + '_' + Date.now() + '.jpg',
+                   guruName: currentAkun ? currentAkun.nama : 'Admin',
+                   base64: row.b64
+                 }),
+                 headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+               });
+               var json = await res.json();
+               if(json.status === 'success') {
+                  finalFoto = row.b64;
+               }
+            } else if (row.b64) {
+               finalFoto = row.b64;
+            }
+
+            var itemToSave = {
+               id: id || 'PK_' + Date.now() + '_' + i,
+               nama: row.nama,
+               warna: row.warna,
+               desc: row.desc,
+               status: 1,
+               foto: finalFoto
+            };
+            
+            if (id) {
+               var idx = pakaianData.findIndex(function(x){ return x.id === id; });
+               if(idx > -1) pakaianData[idx] = itemToSave;
+            } else {
+               pakaianData.push(itemToSave);
+            }
+         }
+         
+         dbSet('pakaian', pakaianData);
+         renderPakaian();
+         
+         if(progInt) clearInterval(progInt);
+         
+         toast('Data pakaian berhasil disimpan','success');
+         catatLog((id ? 'Mengedit' : 'Menambah') + ' Pakaian Batch');
+         
+         // Biarkan ini menggunakan saveSuccessBtn, tombolnya akan kembali dan dialog tertutup
+         saveSuccessBtn(btn, 'm-pakaian');
+      } catch(e) {
+         if(progInt) clearInterval(progInt);
+         console.error(e);
+         toast('Gagal memproses data pakaian', 'error');
+         btn.innerHTML = oriText;
+         btn.disabled = false;
+      }
+    }
 
     function clearKhususForm(){
       document.getElementById('m-khusus-title').textContent = 'Tambah Hari Khusus';
@@ -3327,8 +3525,9 @@
           var text = document.getElementById('login-progress-text');
           if(overlay) { 
              overlay.style.display = 'flex'; 
-             text.textContent = ''; 
-             if(h3) h3.innerHTML = '<span class="ms" style="animation:spin 1s linear infinite; vertical-align:middle; margin-right:8px;">sync</span> Sedang memuat pakaian dinas hari ini...';
+             if (text) text.textContent = ''; 
+             var h3 = overlay.querySelector('h3');
+             if(h3) h3.innerHTML = '<span class="ms" style="animation:spin 1s linear infinite; vertical-align:middle; margin-right:8px; display:inline-block">sync</span> Sedang memuat pakaian dinas hari ini...';
           }
           
           await syncFromCloud(); // Tunggu data selesai diunduh dari Code.gs
