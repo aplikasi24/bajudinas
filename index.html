@@ -361,18 +361,18 @@
     }
 
     /* Toast */
-    #toasts{position:fixed;top:24px;right:24px;z-index:1000;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+    #toasts{position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;flex-direction:column;gap:10px;pointer-events:none;align-items:center}
     .toast{
       background:var(--surface);color:var(--text);
       padding:14px 20px;border-radius:var(--r-md);
       box-shadow:var(--shadow);display:flex;align-items:center;gap:10px;
       border-left:4px solid var(--primary);pointer-events:all;
-      animation:slideR .3s ease;
+      animation:slideDown .3s ease;
     }
     .toast.success{border-color:var(--success)}
     .toast.error  {border-color:var(--danger)}
     .toast.info   {border-color:var(--warning)}
-    @keyframes slideR{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+    @keyframes slideDown{from{transform:translateY(-120%);opacity:0}to{transform:translateY(0);opacity:1}}
     @keyframes fadeOut{to{opacity:0;transform:translateY(-8px)}}
 
     /* PDF Loading Modal & Render Zone */
@@ -2490,7 +2490,9 @@
          toast('Data pakaian berhasil disimpan','success');
          catatLog((id ? 'Mengedit' : 'Menambah') + ' Pakaian Batch');
          
-         // Biarkan ini menggunakan saveSuccessBtn, tombolnya akan kembali dan dialog tertutup
+         // Kembalikan tombol ke teks aslinya sebelum fungsi saveSuccessBtn menambahkan tulisan 'Tersimpan'
+         btn.innerHTML = oriText;
+         btn.disabled = false;
          saveSuccessBtn(btn, 'm-pakaian');
       } catch(e) {
          if(progInt) clearInterval(progInt);
@@ -3019,46 +3021,29 @@
          document.documentElement.setAttribute('data-theme', setObj.pub_theme);
       }
       
-      // Apply Teks Sambutan
+      // Apply Teks Sambutan â€” langsung ke elemen <p> yang benar
       var welcomeText = setObj.pub_text || 'Jadwal Seragam Hari Ini';
-      var pubHeader = document.querySelector('#publik-view p');
-      if (pubHeader && pubHeader.innerHTML.includes('<br>')) {
-         pubHeader.innerHTML = welcomeText + '<br><span id="pub-today-date" style="font-weight:700; color:var(--primary); font-size:16px;"></span>';
+      var pubSubtitleEl = document.querySelector('#publik-view > div > p');
+      if (pubSubtitleEl) {
+         pubSubtitleEl.innerHTML = welcomeText + '<br><span id="pub-today-date" style="font-weight:700; color:var(--primary); font-size:16px;"></span>';
       }
       
-      // Background halaman publik dibuat modern, transparan, dan smooth
+      // Background halaman publik dibuat modern
       var pubView = document.getElementById('publik-view');
       pubView.style.background = 'var(--bg)';
       pubView.style.position = 'relative';
       pubView.style.overflow = 'hidden';
-      // Tambahkan efek ornamen blob di background jika belum ada
       if (!document.getElementById('pub-blob-1')) {
          var blob1 = document.createElement('div');
          blob1.id = 'pub-blob-1';
-         blob1.style.cssText = 'position:fixed; top:-100px; left:-100px; width:400px; height:400px; background:var(--primary); filter:blur(100px); opacity:0.15; border-radius:50%; z-index:0; pointer-events:none; transition:all 2s ease';
+         blob1.style.cssText = 'position:fixed; top:-100px; left:-100px; width:400px; height:400px; background:var(--primary); filter:blur(100px); opacity:0.15; border-radius:50%; z-index:0; pointer-events:none;';
          var blob2 = document.createElement('div');
          blob2.id = 'pub-blob-2';
-         blob2.style.cssText = 'position:fixed; bottom:-100px; right:-100px; width:400px; height:400px; background:var(--danger); filter:blur(100px); opacity:0.1; border-radius:50%; z-index:0; pointer-events:none; transition:all 2s ease';
+         blob2.style.cssText = 'position:fixed; bottom:-100px; right:-100px; width:400px; height:400px; background:var(--danger); filter:blur(100px); opacity:0.1; border-radius:50%; z-index:0; pointer-events:none;';
          pubView.insertBefore(blob1, pubView.firstChild);
          pubView.insertBefore(blob2, pubView.firstChild);
       }
-      
-      // Pastikan konten utama ada di atas blob
-      var pubContent = pubView.querySelector('div');
-      if (pubContent) {
-         pubContent.style.position = 'relative';
-         pubContent.style.zIndex = '1';
-         pubContent.style.backdropFilter = 'blur(20px)';
-         pubContent.style.WebkitBackdropFilter = 'blur(20px)';
-         pubContent.style.background = 'rgba(255,255,255,0.03)'; // subtle glass effect
-         pubContent.style.border = '1px solid rgba(128,128,128,0.2)';
-         pubContent.style.boxShadow = '0 30px 60px rgba(0,0,0,0.1)';
-         pubContent.style.transform = 'translateY(0)';
-         pubContent.style.transition = 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s ease';
-         pubContent.onmouseenter = function() { this.style.transform = 'translateY(-5px)'; this.style.boxShadow = '0 40px 80px rgba(0,0,0,0.15)'; };
-         pubContent.onmouseleave = function() { this.style.transform = 'translateY(0)'; this.style.boxShadow = '0 30px 60px rgba(0,0,0,0.1)'; };
-      }
-      
+
       // Apply Frame Anim
       var glowWrap = document.getElementById('pub-today-glow-wrap');
       var pubCard = document.getElementById('pub-today-card');
@@ -3075,15 +3060,13 @@
       // Apply Frame Color
       if (setObj.pub_frame_color) {
          glowWrap.style.setProperty('--glow-color', setObj.pub_frame_color);
-         glowWrap.style.background = 'linear-gradient(45deg, var(--glow-color), transparent)';
          pubCard.style.borderColor = setObj.pub_frame_color;
       }
-      
 
       var now = new Date();
-      var dateLabel = document.getElementById('pub-today-date');
-      if (dateLabel) {
-        dateLabel.textContent = HARI[now.getDay()] + ', ' + now.getDate() + ' ' + BULAN[now.getMonth()] + ' ' + now.getFullYear();
+      var dateEl = document.getElementById('pub-today-date');
+      if (dateEl) {
+        dateEl.textContent = HARI[now.getDay()] + ', ' + now.getDate() + ' ' + BULAN[now.getMonth()] + ' ' + now.getFullYear();
       }
 
       var info = todayUniform(now);
@@ -3095,40 +3078,74 @@
          glowWrap.className = 'glow-' + now.getDay();
       }
       
-      // Ambil pengaturan background kustom (hanya untuk area belakang baju)
-      var customBg = '';
-      if (setObj.pub_bg_type === 'image' && setObj.pub_bg_image && isValidFoto(setObj.pub_bg_image)) {
-         customBg = 'url("' + setObj.pub_bg_image + '") center/cover no-repeat';
-      } else if (setObj.pub_bg_type === 'color' && setObj.pub_bg_color) {
-         customBg = setObj.pub_bg_color;
-      }
+      // Background kustom (di belakang baju)
+      var hasBgImage = setObj.pub_bg_type === 'image' && setObj.pub_bg_image && isValidFoto(setObj.pub_bg_image);
+      var hasBgColor = setObj.pub_bg_type === 'color' && setObj.pub_bg_color;
       
       if (info.pakaian && info.pakaian.nama !== 'Belum diatur' && info.pakaian.nama !== 'Libur') {
-         var shirtImg = info.pakaian.foto && isValidFoto(info.pakaian.foto) ? 'url("'+info.pakaian.foto+'") center/contain no-repeat' : '';
+         var hasFoto = info.pakaian.foto && isValidFoto(info.pakaian.foto);
          
-         // Jika ada foto baju dan background kustom, gabungkan! Baju di atas, background di bawah.
-         if (shirtImg && customBg) {
-            thumb.style.background = shirtImg + ', ' + customBg;
-         } else if (shirtImg) {
-            thumb.style.background = shirtImg + ', ' + (info.pakaian.warna || 'var(--surface)');
+         // Susun background: foto baju (contain) + background kustom (cover) dipisah melalui CSS multiple background
+         if (hasFoto && hasBgImage) {
+            thumb.style.backgroundImage = 'url("' + info.pakaian.foto + '"), url("' + setObj.pub_bg_image + '")';
+            thumb.style.backgroundSize = 'contain, cover';
+            thumb.style.backgroundRepeat = 'no-repeat, no-repeat';
+            thumb.style.backgroundPosition = 'center, center';
+            thumb.style.backgroundColor = '';
+         } else if (hasFoto && hasBgColor) {
+            thumb.style.backgroundImage = 'url("' + info.pakaian.foto + '")';
+            thumb.style.backgroundSize = 'contain';
+            thumb.style.backgroundRepeat = 'no-repeat';
+            thumb.style.backgroundPosition = 'center';
+            thumb.style.backgroundColor = setObj.pub_bg_color;
+         } else if (hasFoto) {
+            thumb.style.backgroundImage = 'url("' + info.pakaian.foto + '")';
+            thumb.style.backgroundSize = 'contain';
+            thumb.style.backgroundRepeat = 'no-repeat';
+            thumb.style.backgroundPosition = 'center';
+            thumb.style.backgroundColor = info.pakaian.warna || '#f1f5f9';
+         } else if (hasBgImage) {
+            thumb.style.backgroundImage = 'url("' + setObj.pub_bg_image + '")';
+            thumb.style.backgroundSize = 'cover';
+            thumb.style.backgroundPosition = 'center';
+            thumb.style.backgroundColor = '';
+         } else if (hasBgColor) {
+            thumb.style.backgroundImage = 'none';
+            thumb.style.backgroundColor = setObj.pub_bg_color;
          } else {
-            thumb.style.background = customBg || info.pakaian.warna;
+            thumb.style.backgroundImage = 'none';
+            thumb.style.backgroundColor = info.pakaian.warna || '#2563eb';
          }
          
-         nameEl.textContent = info.pakaian.nama;
+         nameEl.textContent = info.type === 'khusus' ? 'ðŸŒŸ ' + info.pakaian.nama : info.pakaian.nama;
          var activityText = info.kegiatan ? '<div style="font-size:16px; font-weight:700; color:var(--primary); margin-top:4px;">ðŸ“Œ ' + info.kegiatan + '</div>' : '';
          descEl.innerHTML = activityText + '<div style="margin-top:6px; opacity:0.9">' + (info.pakaian.desc || 'Seragam sesuai jadwal') + '</div>';
-         if(info.type === 'khusus') nameEl.textContent = 'ðŸŒŸ ' + nameEl.textContent;
       } else {
-         var liburImg = setObj.libur_image && isValidFoto(setObj.libur_image) ? 'url("'+setObj.libur_image+'") center/cover no-repeat' : '';
+         // Hari libur
+         var hasLiburImg = setObj.libur_image && isValidFoto(setObj.libur_image);
          var liburTxt = setObj.libur_text || 'Hari ini sekolah libur';
          
-         if (liburImg && customBg) {
-            thumb.style.background = liburImg + ', ' + customBg;
-         } else if (liburImg) {
-            thumb.style.background = liburImg;
+         if (hasLiburImg && hasBgImage) {
+            thumb.style.backgroundImage = 'url("' + setObj.libur_image + '"), url("' + setObj.pub_bg_image + '")';
+            thumb.style.backgroundSize = 'contain, cover';
+            thumb.style.backgroundRepeat = 'no-repeat, no-repeat';
+            thumb.style.backgroundPosition = 'center, center';
+            thumb.style.backgroundColor = '';
+         } else if (hasLiburImg && hasBgColor) {
+            thumb.style.backgroundImage = 'url("' + setObj.libur_image + '")';
+            thumb.style.backgroundSize = 'contain';
+            thumb.style.backgroundRepeat = 'no-repeat';
+            thumb.style.backgroundPosition = 'center';
+            thumb.style.backgroundColor = setObj.pub_bg_color;
+         } else if (hasLiburImg) {
+            thumb.style.backgroundImage = 'url("' + setObj.libur_image + '")';
+            thumb.style.backgroundSize = 'contain';
+            thumb.style.backgroundRepeat = 'no-repeat';
+            thumb.style.backgroundPosition = 'center';
+            thumb.style.backgroundColor = '#fee2e2';
          } else {
-            thumb.style.background = customBg || '#f87171';
+            thumb.style.backgroundImage = 'none';
+            thumb.style.backgroundColor = hasBgColor ? setObj.pub_bg_color : '#f87171';
          }
          
          nameEl.textContent = 'Libur / Bebas';
