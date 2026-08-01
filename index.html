@@ -917,17 +917,11 @@
       </div>
       <input type="hidden" id="fp-id">
       
-      <!-- 4 Elements Grid -->
-      <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:16px; align-items:start; margin-bottom:16px;">
-        <div class="input-wrap" style="margin-bottom:0"><label>Nama Pakaian</label><input type="text" id="fp-nama" placeholder="contoh: PDH Khaki"></div>
-        <div class="input-wrap" style="margin-bottom:0"><label>Warna Tema</label><input type="color" id="fp-warna" value="#2563eb" style="height:48px;padding:4px;width:100%"></div>
-        <div style="display:flex; flex-direction:column; gap:8px">
-          <div class="input-wrap" style="margin-bottom:0"><label>Foto Seragam (Opsional)</label><input type="file" id="fp-foto" accept="image/*" style="padding-top:10px" onchange="previewFoto(this)"></div>
-          <div id="fp-preview" style="width:100%;height:100px;background-size:contain;background-repeat:no-repeat;background-position:center;border-radius:var(--r-md);display:none;background-color:rgba(0,0,0,0.2)"></div>
-          <input type="hidden" id="fp-foto-b64">
-        </div>
-        <div class="input-wrap" style="height:100%; margin-bottom:0; display:flex; flex-direction:column"><label>Deskripsi</label><textarea id="fp-desc" style="flex:1; min-height:80px; resize:none" placeholder="Keterangan singkat pakaian"></textarea></div>
+      <div id="fp-rows-container" style="max-height:60vh; overflow-y:auto; overflow-x:hidden; padding-right:8px; padding-top:10px;">
+        <!-- Rows akan digenerate oleh JS -->
       </div>
+      
+      <button class="btn btn-outline" style="width:100%; margin-bottom:16px; border-style:dashed; color:var(--primary); border-color:var(--primary)" onclick="addPakaianRow()" id="btn-add-pakaian-row"><span class="ms">add</span> Tambah Baris Pakaian (Maks 5)</button>
       
 
       <button class="btn btn-primary" style="width:100%" onclick="savePakaian(this)">Simpan</button>
@@ -968,8 +962,8 @@
         <button class="modal-close" onclick="closeModal('m-khusus')"><span class="ms">close</span></button>
       </div>
       <input type="hidden" id="fk-id">
-      <div style="display:flex;gap:12px">
-        <div class="input-wrap" style="flex:1"><label>Tanggal (1â€“31)</label><input type="number" id="fk-tgl" min="1" max="31"></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <div class="input-wrap" style="flex:1;min-width:120px;"><label>Tanggal (1â€“31)</label><input type="text" inputmode="numeric" pattern="[0-9]*" id="fk-tgl" placeholder="1-31"></div>
         <div class="input-wrap" style="flex:1"><label>Bulan</label>
           <select id="fk-bln">
             <option value="">Semua Bulan (Rutinan)</option>
@@ -2244,19 +2238,6 @@
       saveSuccessBtn(btn, 'm-guru');
     }
 
-    function clearPakaianForm(){
-      document.getElementById('fp-id').value='';
-      document.getElementById('fp-nama').value='';
-      document.getElementById('fp-warna').value='#2563eb';
-      document.getElementById('fp-desc').value='';
-      document.getElementById('fp-foto').value='';
-      document.getElementById('fp-foto-b64').value='';
-      document.getElementById('fp-preview').style.display='none';
-      
-      document.getElementById('m-pakaian-title').textContent='Tambah Pakaian';
-    }
-
-
     function previewFoto(input) {
       if(input.files && input.files[0]) {
         var file = input.files[0];
@@ -2310,86 +2291,7 @@
       }
     }
 
-    async function savePakaian(btn){
-      var id = document.getElementById('fp-id').value;
-      var b64 = document.getElementById('fp-foto-b64').value || '';
-      var nama = document.getElementById('fp-nama').value;
-      
-      if(!nama) return toast('Nama pakaian wajib diisi!','error');
 
-      if(b64.startsWith('data:image') && APPS_SCRIPT_URL) {
-        var oriText = btn.innerHTML;
-        btn.innerHTML = '<span class="ms" style="animation:spin 1s linear infinite">refresh</span> Mengunggah...';
-        btn.disabled = true;
-        try {
-          // Format nama pakaian agar aman dijadikan nama file
-          var safePakaianName = nama.replace(/[^a-zA-Z0-9 _-]/g, '').trim() || 'Pakaian';
-          
-          var res = await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-              action: 'upload_image',
-              filename: safePakaianName + '.jpg',
-              guruName: currentAkun ? currentAkun.nama : 'Admin',
-              base64: b64
-            }),
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-          });
-          var json = await res.json();
-          if(json.status === 'success' && json.url) {
-            // Berhasil unggah ke Drive, namun kita tetap memakai b64 (Base64) 
-            // untuk disimpan ke database agar gambar ke-load instan & anti-blokir CORS
-            console.log("Foto sukses dibackup ke Drive:", json.url);
-          } else {
-            toast('Gagal mengunggah foto', 'error');
-          }
-        } catch(e) {
-          console.error(e);
-          toast('Error koneksi saat mengunggah foto', 'error');
-        }
-        btn.innerHTML = oriText;
-        btn.disabled = false;
-      }
-      
-      var data = {
-        id: id || null,
-        nama: nama,
-        warna: document.getElementById('fp-warna').value,
-        desc: document.getElementById('fp-desc').value,
-        foto: b64,
-        status: 1
-      };
-      dbSave('pakaian', data);
-      renderPakaian();
-      renderDash();
-      toast('Tersimpan!','success');
-      catatLog((id ? 'Mengedit' : 'Menambah') + ' Pakaian: ' + nama);
-      saveSuccessBtn(btn, 'm-pakaian');
-    }
-
-    function editPakaian(id){
-      var p = dbGet('pakaian').find(function(x){ return x.id===id; });
-      if(p){
-        document.getElementById('fp-id').value=p.id;
-        document.getElementById('fp-nama').value=p.nama;
-        document.getElementById('fp-warna').value=p.warna;
-        document.getElementById('fp-desc').value=p.desc||'';
-        document.getElementById('fp-foto').value='';
-        document.getElementById('fp-foto-b64').value=p.foto||'';
-        
-        var prev = document.getElementById('fp-preview');
-        if(p.foto) {
-           prev.style.backgroundImage = 'url(\'' + p.foto + '\')';
-           prev.style.display = 'block';
-        } else {
-           prev.style.display = 'none';
-        }
-
-
-        document.getElementById('m-pakaian-title').textContent='Edit Pakaian';
-        openModal('m-pakaian');
-      }
-    }
 
     function clearKhususForm(){
       document.getElementById('m-khusus-title').textContent = 'Tambah Hari Khusus';
@@ -2657,8 +2559,15 @@
        var keysToUpload = ['pub_bg_image', 'libur_image'];
        for(var k of keysToUpload) {
           if(obj[k] && obj[k].startsWith('data:image') && APPS_SCRIPT_URL) {
-             btn.innerHTML = '<span class="ms" style="animation:spin 1s linear infinite">refresh</span> Mengunggah...';
              btn.disabled = true;
+             
+             var pct = 0;
+             var progInt = setInterval(function() {
+               pct += Math.floor(Math.random() * 15) + 5;
+               if(pct >= 95) pct = 95;
+               btn.innerHTML = '<span class="ms" style="animation:spin 1s linear infinite; font-size:16px; vertical-align:middle; margin-right:6px">autorenew</span> Mengunggah ' + pct + '%';
+             }, 150);
+             
              try {
                 var res = await fetch(APPS_SCRIPT_URL, {
                    method: 'POST',
@@ -2671,12 +2580,15 @@
                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 });
                 var json = await res.json();
+                clearInterval(progInt);
+                
                 if(json.status === 'success' && json.url) {
+                   btn.innerHTML = '<span class="ms" style="font-size:16px; vertical-align:middle; margin-right:6px">check_circle</span> Sukses 100%';
+                   await new Promise(r => setTimeout(r, 500));
                    console.log("Pengaturan sukses dibackup ke Drive:", json.url);
-                   // Kita TETAP menggunakan obj[k] (Base64) untuk disimpan di database
-                   // agar tidak terkena blokir CORS dari Google Drive
                 }
              } catch(e) {
+                clearInterval(progInt);
                 console.error(e);
                 toast('Gagal mengunggah foto ' + k, 'error');
              }
@@ -3125,17 +3037,15 @@
       }
       var oldHtml = btn.innerHTML;
       var oldW = btn.style.width;
-      var compW = btn.offsetWidth;
-      if(compW > 0) btn.style.width = compW + 'px';
       
-      btn.innerHTML = '<span class="ms" style="font-size:24px; vertical-align:middle">check</span>';
+      btn.innerHTML = oldHtml + '<span style="margin-left:8px; display:inline-flex; align-items:center; gap:4px;"><span class="ms" style="font-size:18px;">check_circle</span> Tersimpan</span>';
       
       setTimeout(function(){
          if(modalId) closeModal(modalId);
          btn.innerHTML = oldHtml;
          btn.style.width = oldW;
          if(callback) callback();
-      }, 600);
+      }, 1000);
     }
 
     // ================================================
