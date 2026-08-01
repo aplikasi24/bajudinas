@@ -2132,6 +2132,15 @@
       document.getElementById('m-kegiatan-title').textContent='Tambah Kegiatan';
     }
 
+    function clearPakaianForm(){
+      document.getElementById('fp-id').value='';
+      document.getElementById('fp-rows-container').innerHTML='';
+      for(var i = 0; i < 5; i++) {
+         createPakaianRow(null);
+      }
+      document.getElementById('m-pakaian-title').textContent='Tambah Pakaian (Maks 5)';
+    }
+
     function editMasterKegiatan(id){
       var d = dbGet('master_kegiatan').find(function(x){return x.id===id;});
       if(!d) return;
