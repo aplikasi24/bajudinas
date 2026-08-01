@@ -3347,6 +3347,21 @@
 
         if(sid) {
           currentSekolahId = sid.toUpperCase().replace(/[^A-Z0-9]+/g, '_');
+          
+          // Karena ini mode publik (bisa diakses pengunjung baru), kita Wajib mengambil data dari server dulu
+          var overlay = document.getElementById('login-loading-overlay');
+          var text = document.getElementById('login-progress-text');
+          if(overlay) { 
+             overlay.style.display = 'flex'; 
+             text.textContent = ''; 
+             var h3 = overlay.querySelector('h3');
+             if(h3) h3.textContent = 'Menyinkronkan Data Server...';
+          }
+          
+          await syncFromCloud(); // Tunggu data selesai diunduh dari Code.gs
+          
+          if(overlay) overlay.style.display = 'none';
+          
           showView('publik-view');
           renderPublikView();
           return; // Stop di sini jika akses publik
